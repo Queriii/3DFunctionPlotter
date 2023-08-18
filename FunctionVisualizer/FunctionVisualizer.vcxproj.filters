@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Src">
+      <UniqueIdentifier>{ab62550e-10b6-414a-b86b-cfc4c7ef8a13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hdr">
+      <UniqueIdentifier>{f23645e6-87d3-473d-9c2a-8862427968bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Win32">
+      <UniqueIdentifier>{8e0d09fd-25c4-4444-9d07-385c3d37133b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\D3D11">
+      <UniqueIdentifier>{7844d74c-9301-4bd7-bdf3-43bdebfa2fa6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hdr\Win32">
+      <UniqueIdentifier>{b8dc714e-1655-490d-9b0e-a81b34e00405}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hdr\D3D11">
+      <UniqueIdentifier>{cb058dfe-08ab-49af-a177-f6197b0ddec5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{16fbad0e-8c45-4e52-8fcf-1ac6b1994361}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hdr\Data Structures">
+      <UniqueIdentifier>{15d80ce8-0c2e-409a-808d-d7120b4d5122}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\D3D11\Fragments">
+      <UniqueIdentifier>{ece33e29-f154-468c-aef5-8af8aee6a7fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hdr\D3D11\Fragments">
+      <UniqueIdentifier>{9489956c-48c8-418f-8eb9-0aa484990716}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\D3D11\Fragments\CartesianAxis">
+      <UniqueIdentifier>{63d2c8ca-75e0-49af-b9c9-df1dfcdaaac8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hdr\D3D11\Fragments\CartesianAxis">
+      <UniqueIdentifier>{337f45eb-5dbe-4712-a707-5dfdbca5c1a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hdr\D3D11\Fragments\CartesianGrid">
+      <UniqueIdentifier>{2086a49f-58e9-4f21-bf0f-e2fee6dd8ff9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\D3D11\Fragments\CartesianGrid">
+      <UniqueIdentifier>{d4d2569a-29d1-483e-9163-f2a98706ccda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Data Structures">
+      <UniqueIdentifier>{41689fd8-ee49-48eb-a4c7-82329c16ca88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hdr\Exceptions">
+      <UniqueIdentifier>{823edf69-196e-4002-931a-c9b7673e947c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Exceptions">
+      <UniqueIdentifier>{4af9738d-e457-4e82-8049-ed2801718499}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Src\Win32\Window.cpp">
+      <Filter>Src\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\WinMain.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\D3D11\D3D11.cpp">
+      <Filter>Src\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\D3D11\D3D11Fragment.cpp">
+      <Filter>Src\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\D3D11\D3D11Camera.cpp">
+      <Filter>Src\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\D3D11\Fragments\CartesianAxis.cpp">
+      <Filter>Src\D3D11\Fragments\CartesianAxis</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Win32\Timer.cpp">
+      <Filter>Src\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\D3D11\Fragments\CartesianGrid.cpp">
+      <Filter>Src\D3D11\Fragments\CartesianGrid</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Data Structures\String.cpp">
+      <Filter>Src\Data Structures</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Data Structures\Parser.cpp">
+      <Filter>Src\Data Structures</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Exceptions\Exceptions.cpp">
+      <Filter>Src\Exceptions</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Hdr\Win32\Window.hpp">
+      <Filter>Hdr\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\resource.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Hdr\D3D11\D3D11.hpp">
+      <Filter>Hdr\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Hdr\D3D11\D3D11Fragment.hpp">
+      <Filter>Hdr\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Hdr\D3D11\D3D11Camera.hpp">
+      <Filter>Hdr\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Hdr\D3D11\Fragments\CartesianAxis.hpp">
+      <Filter>Hdr\D3D11\Fragments\CartesianAxis</Filter>
+    </ClInclude>
+    <ClInclude Include="Hdr\Win32\Timer.hpp">
+      <Filter>Hdr\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Hdr\D3D11\Fragments\CartesianGrid.hpp">
+      <Filter>Hdr\D3D11\Fragments\CartesianGrid</Filter>
+    </ClInclude>
+    <ClInclude Include="Hdr\Data Structures\String.hpp">
+      <Filter>Hdr\Data Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Hdr\Data Structures\Stack.hpp">
+      <Filter>Hdr\Data Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Hdr\Data Structures\List.hpp">
+      <Filter>Hdr\Data Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Hdr\Data Structures\Parser.hpp">
+      <Filter>Hdr\Data Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Hdr\Exceptions\Exceptions.hpp">
+      <Filter>Hdr\Exceptions</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resources\FunctionVisualizer.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Src\D3D11\Fragments\CartesianAxisVS.hlsl">
+      <Filter>Src\D3D11\Fragments\CartesianAxis</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\D3D11\Fragments\CartesianAxisPS.hlsl">
+      <Filter>Src\D3D11\Fragments\CartesianAxis</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\D3D11\Fragments\CartesianGridVS.hlsl">
+      <Filter>Src\D3D11\Fragments\CartesianGrid</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\D3D11\Fragments\CartesianGridPS.hlsl">
+      <Filter>Src\D3D11\Fragments\CartesianGrid</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>
