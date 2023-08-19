@@ -1,13 +1,12 @@
 #include "../../Hdr/Data Structures/Parser.hpp"
 #include "../../Hdr/Data Structures/Stack.hpp"
 #include "../../Hdr/Data Structures/String.hpp"
-//Parser is shit, make better later.
 
 
 
 
 //Public
-bool Parser::IsValidAxisRange(_In_ PCTSTR pctszRange)
+bool Parser::IsValidAxisRange(PCTSTR pctszRange)
 {
     assert(pctszRange != nullptr);
 
@@ -19,41 +18,83 @@ bool Parser::IsValidAxisRange(_In_ PCTSTR pctszRange)
     return (pctszRange[0] != __TEXT('0'));
 }
 
-bool Parser::IsValidParseTarget(_In_ PCTSTR pctszInfix)
-{
-    String Infix(pctszInfix);
-    Infix.Lower();
-    Infix.ReplaceAll(__TEXT(" "), __TEXT(""));
-    for (UINT i = 0; i < _countof(Parser::ValidFunctionTokenPairs); i++)
-    {
-        Infix.ReplaceAll(Parser::ValidFunctionTokenPairs[i].pctszFunctionName, Parser::ValidFunctionTokenPairs[i].pctszFunctionToken);
-    }
-
-
-    //Check for invalid symbol
-    for (UINT i = 0; i < _tcslen(Infix.Get()); i++)
-    {
-        if (!Parser::IsValidSymbol(Infix.Get()[i]))
-        {
-            return false;
-        }
-    }
-
-    //Validate parenthesis
-    if (!Parser::IsValidParenthesis(pctszInfix))
-    {
-        return false;
-    }
-   
-    return TRUE;
-}
-
-void Parser::GenerateInfixTokens(_In_ PCTSTR pctszInfix, _Out_ List<PTSTR>& Tokens)
+bool Parser::IsValidFunction(PCTSTR pctszInfix)
 {
     assert(pctszInfix != nullptr);
 
-    //Setup format
-    Tokens.SetCleanupDynamicElementsType(List<PTSTR>::DynamicElementType::Array);
+    List<PTSTR> PostfixTokens;
+    Parser::InfixToPostfix(pctszInfix, PostfixTokens);
+    if (!PostfixTokens.Size())
+    {
+        return false;
+    }
+
+    Stack<PTSTR> Operands;
+    for (UINT i = 0; i < PostfixTokens.Size(); i++)
+    {
+        if (Parser::IsOperator(PostfixTokens[i]))
+        {
+            if (Operands.Size() < 2)
+            {
+                return false;
+            }
+
+            if (!(Parser::IsNumber(Operands.Peek()) || Parser::IsVariable(Operands.Peek())))
+            {
+                return false;
+            }
+            delete[] Operands.Pop();
+
+            if (!(Parser::IsNumber(Operands.Peek()) || Parser::IsVariable(Operands.Peek())))
+            {
+                return false;
+            }
+            delete[] Operands.Pop();
+
+            PTSTR DummyOperand = new TCHAR[2]{ __TEXT('0'), __TEXT('\0') };
+            Operands.Push(DummyOperand);
+        }
+        else if (Parser::IsFunction(PostfixTokens[i]))
+        {
+            if (Operands.Size() < 1)
+            {
+                return false;
+            }
+
+            if (!(Parser::IsNumber(Operands.Peek()) || Parser::IsVariable(Operands.Peek())))
+            {
+                return false;
+            }
+            delete[] Operands.Pop();
+
+            PTSTR DummyOperand = new TCHAR[2]{ __TEXT('0'), __TEXT('\0') };
+            Operands.Push(DummyOperand);
+        }
+        else
+        {
+            size_t  ullOperandLength    = _tcslen(PostfixTokens[i]);
+            PTSTR   ptszOperand         = new TCHAR[ullOperandLength + 1]{};
+            _tcscpy_s(ptszOperand, ullOperandLength + 1, PostfixTokens[i]);
+            Operands.Push(ptszOperand);
+        }
+    }
+
+    //Cleanup
+    while (Operands.Size())
+    {
+        delete[] Operands.Pop();
+    }
+    for (UINT i = 0; i < PostfixTokens.Size(); i++)
+    {
+        delete[] PostfixTokens[i];
+    }
+
+    return true;
+}
+
+void Parser::GenerateInfixTokens(PCTSTR pctszInfix, List<PTSTR>& Tokens)
+{
+    assert(pctszInfix != nullptr);
 
     String Infix(pctszInfix);
     Infix.Lower();
@@ -65,10 +106,10 @@ void Parser::GenerateInfixTokens(_In_ PCTSTR pctszInfix, _Out_ List<PTSTR>& Toke
 
     for (UINT i = 0; i < _tcslen(Infix.Get()); i++)
     {
-        if (Infix.Get()[i] >= __TEXT('0') && Infix.Get()[i] <= __TEXT('9'))
+        if (Parser::IsNumber(Infix.Get()[i]))
         {
             UINT j = i;
-            for (; j < _tcslen(Infix.Get()) && (Infix.Get()[j] >= __TEXT('0') && Infix.Get()[j] <= __TEXT('9')); j++)
+            for (; j < _tcslen(Infix.Get()) && Parser::IsNumber(Infix.Get()[j]); j++)
             {
             }
 
@@ -84,30 +125,30 @@ void Parser::GenerateInfixTokens(_In_ PCTSTR pctszInfix, _Out_ List<PTSTR>& Toke
         }
         else
         {
-            PTSTR Token = new TCHAR[2]{};
-            Token[0] = Infix.Get()[i];
-            Token[1] = __TEXT('\0');
-
+            PTSTR Token = new TCHAR[2]{Infix.Get()[i], __TEXT('\0')};
             Tokens.Append(static_cast<PTSTR>(Token));
         }
     }
 }
 
-void Parser::InfixToPostfix(_In_ List<PTSTR>& InfixTokens, _Out_ List<PTSTR>& PostfixTokens)
+void Parser::InfixToPostfix(PCTSTR pctszInfix, List<PTSTR>& PostfixTokens)
 {
-    assert(InfixTokens.Size() != 0);
+    assert(pctszInfix != nullptr); 
 
+    List<PTSTR>     InfixTokens;
+    Stack<TCHAR>    OperatorStack;
 
-    Stack<TCHAR> OperatorStack;
+    Parser::GenerateInfixTokens(pctszInfix, InfixTokens);
 
-    //Convert to postfix
     for (UINT i = 0; i < InfixTokens.Size(); i++)
     {
-        if (Parser::IsNumber(InfixTokens[i]))
+        if (Parser::IsNumber(InfixTokens[i]) || Parser::IsVariable(InfixTokens[i]))
         {
-            PTSTR ptszCopy = new TCHAR[_tcslen(InfixTokens[i]) + 1]{};
-            _tcscpy_s(ptszCopy, _tcslen(InfixTokens[i]) + 1, InfixTokens[i]);
-            PostfixTokens.Append(static_cast<PTSTR>(ptszCopy));
+            size_t ullTokenLength   = _tcslen(InfixTokens[i]);
+            PTSTR ptszToken         = new TCHAR[ullTokenLength + 1]{};
+            _tcscpy_s(ptszToken, ullTokenLength + 1, InfixTokens[i]);
+
+            PostfixTokens.Append(static_cast<PTSTR>(ptszToken));
         }
         else if (Parser::IsFunction(InfixTokens[i]))
         {
@@ -115,101 +156,78 @@ void Parser::InfixToPostfix(_In_ List<PTSTR>& InfixTokens, _Out_ List<PTSTR>& Po
         }
         else if (Parser::IsOperator(InfixTokens[i]))
         {
+            while (OperatorStack.Size() && OperatorStack.Peek() != __TEXT('('))
+            {
+                Parser::OperatorInformation TopStackOperatorInfo = Parser::GetOperatorInformation(OperatorStack.Peek());
+                Parser::OperatorInformation CurrentOperatorInfo = Parser::GetOperatorInformation(InfixTokens[i]);
+
+                if (!((TopStackOperatorInfo.uiPrecedence > CurrentOperatorInfo.uiPrecedence) || ((TopStackOperatorInfo.uiPrecedence == CurrentOperatorInfo.uiPrecedence) && CurrentOperatorInfo.bLeftAssociativity)))
+                {
+                    break;
+                }
+
+                PTSTR Operator = new TCHAR[2]{ OperatorStack.Pop(), __TEXT('\0') };
+                PostfixTokens.Append(static_cast<PTSTR>(Operator));
+            }
+
+            OperatorStack.Push(InfixTokens[i][0]);
+        }
+        else if (InfixTokens[i][0] == __TEXT('(') && _tcslen(InfixTokens[i]) == 1)
+        {
+            OperatorStack.Push(InfixTokens[i][0]);
+        }
+        else if (InfixTokens[i][0] == __TEXT(')') && _tcslen(InfixTokens[i]) == 1)
+        {
             for (;;)
             {
                 if (!OperatorStack.Size())
                 {
-                    break;
+                    PostfixTokens.RemoveAll();
+                    return;
                 }
 
                 if (OperatorStack.Peek() == __TEXT('('))
                 {
+                    OperatorStack.Pop();
                     break;
                 }
-                Parser::OperatorInformation CurrentOperatorInfo = Parser::GetOperatorInformation(InfixTokens[i]);
-                TCHAR TempOperator[2] = { OperatorStack.Peek(), __TEXT('\0') };
-                Parser::OperatorInformation TopStackOperatorInfo = Parser::GetOperatorInformation(TempOperator);
-                if ((TopStackOperatorInfo.pctszOperator[0] != __TEXT('(')) && ((TopStackOperatorInfo.uiPrecedence > CurrentOperatorInfo.uiPrecedence) || ((TopStackOperatorInfo.uiPrecedence == CurrentOperatorInfo.uiPrecedence) && CurrentOperatorInfo.bLeftAssociativity)))
-                {
-                    PTSTR DynOperator = new TCHAR[2]{};
-                    DynOperator[0] = OperatorStack.Pop();
-                    DynOperator[1] = __TEXT('\0');
-                    PostfixTokens.Append(static_cast<PTSTR>(DynOperator));
-                }
-                else
-                {
-                    break;
-                }
+
+                PTSTR Operator = new TCHAR[2]{ OperatorStack.Pop(), __TEXT('\0') };
+                PostfixTokens.Append(static_cast<PTSTR>(Operator));
             }
-
-            OperatorStack.Push(InfixTokens[i][0]);
-        }
-        else if (InfixTokens[i][0] == __TEXT(','))
-        {
-            for (;;)
-            {
-                if (!OperatorStack.Size())
-                {
-                    break;
-                }
-
-                if (OperatorStack.Peek() != __TEXT('('))
-                {
-                    PTSTR DynOperator = new TCHAR[2]{};
-                    DynOperator[0] = OperatorStack.Pop();
-                    DynOperator[1] = __TEXT('\0');
-                    PostfixTokens.Append(static_cast<PTSTR>(DynOperator));
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-        else if (InfixTokens[i][0] == __TEXT('('))
-        {
-            OperatorStack.Push(InfixTokens[i][0]);
-        }
-        else if (InfixTokens[i][0] == __TEXT(')'))
-        {
-            for (;;)
-            {
-                if (!OperatorStack.Size())
-                {
-                    assert(1 == 0);
-                }
-
-                if (OperatorStack.Peek() != __TEXT('('))
-                {
-                    PTSTR DynOperator = new TCHAR[2]{};
-                    DynOperator[0] = OperatorStack.Pop();
-                    DynOperator[1] = __TEXT('\0');
-                    PostfixTokens.Append(static_cast<PTSTR>(DynOperator));
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            OperatorStack.Pop();
 
             if (OperatorStack.Size())
             {
-                TCHAR TempOperator[2] = { OperatorStack.Peek(), __TEXT('\0') };
-                if (Parser::IsFunction(TempOperator))
+                if (Parser::IsFunction(OperatorStack.Peek()))
                 {
-                    PTSTR DynOperator = new TCHAR[2]{};
-                    DynOperator[0] = OperatorStack.Pop();
-                    DynOperator[1] = __TEXT('\0');
-                    PostfixTokens.Append(static_cast<PTSTR>(DynOperator));
+                    PTSTR Operator = new TCHAR[2]{ OperatorStack.Pop(), __TEXT('\0') };
+                    PostfixTokens.Append(static_cast<PTSTR>(Operator));
                 }
             }
         }
         else
         {
-            assert(1 == 0);
+            PostfixTokens.RemoveAll();
+            return;
         }
+    }
+
+    //Cleanup Infix Tokens
+    for (UINT i = 0; i < InfixTokens.Size(); i++)
+    {
+        delete[] InfixTokens[i];
+    }
+
+    while (OperatorStack.Size())
+    {
+        if (OperatorStack.Peek() == __TEXT('('))
+        {
+            PostfixTokens.RemoveAll();
+            return;
+        }
+
+        PTSTR Operator = new TCHAR[2]{ OperatorStack.Pop(), __TEXT('\0') };
+        PostfixTokens.Append(static_cast<PTSTR>(Operator));
     }
 }
 
@@ -217,72 +235,9 @@ void Parser::InfixToPostfix(_In_ List<PTSTR>& InfixTokens, _Out_ List<PTSTR>& Po
 
 
 //Private
-bool Parser::IsValidSymbol(TCHAR c)
+bool Parser::IsNumber(TCHAR c)
 {
-    //Check numbers
-    if (c >= __TEXT('0') && c <= __TEXT('9'))
-    {
-        return true;
-    }
-
-    //Check parenthesis
-    if (c == __TEXT('(') || c == __TEXT(')'))
-    {
-        return true;
-    }
-
-    //Check functions
-    for (UINT i = 0; i < _countof(Parser::ValidFunctionTokenPairs); i++)
-    {
-        if (c == Parser::ValidFunctionTokenPairs[i].pctszFunctionToken[0])
-        {
-            return true;
-        }
-    }
-
-    //Check operators
-    for (UINT i = 0; i < _countof(Parser::ValidOperators); i++) 
-    {
-        if (c == Parser::ValidOperators[i].pctszOperator[0])
-        {
-            return true;
-        }
-    }
-
-    //Check allowed variables
-    if (c == __TEXT('x') || c == __TEXT('z'))
-    {
-        return true;
-    }
-
-    return false;
-}
-
-bool Parser::IsValidParenthesis(PCTSTR pctszInfixNotation)
-{
-    assert(pctszInfixNotation != nullptr);
-
-    Stack<TCHAR> Parenthesis;
-    for (UINT i = 0; i < _tcslen(pctszInfixNotation); i++)
-    {
-        if (pctszInfixNotation[i] == __TEXT('('))
-        {
-            Parenthesis.Push(__TEXT('('));
-        }
-        else if (pctszInfixNotation[i] == __TEXT(')'))
-        {
-            if (!Parenthesis.Size())
-            {
-                return false;
-            }
-            else
-            {
-                Parenthesis.Pop();
-            }
-        }
-    }
-
-    return (Parenthesis.Size() == 0);
+    return (c >= __TEXT('0') && c <= __TEXT('9'));
 }
 
 bool Parser::IsNumber(PTSTR c)
@@ -298,6 +253,19 @@ bool Parser::IsNumber(PTSTR c)
     return true;
 }
 
+bool Parser::IsFunction(TCHAR c)
+{
+    for (UINT i = 0; i < _countof(Parser::ValidFunctionTokenPairs); i++)
+    {
+        if (c == Parser::ValidFunctionTokenPairs[i].pctszFunctionToken[0])
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool Parser::IsFunction(PTSTR c)
 {
     if (_tcslen(c) > 1)
@@ -307,7 +275,20 @@ bool Parser::IsFunction(PTSTR c)
 
     for (UINT i = 0; i < _countof(Parser::ValidFunctionTokenPairs); i++)
     {
-        if (c[0] == Parser::ValidFunctionTokenPairs[i].pctszFunctionToken[0])
+        if (c[0] == Parser::ValidFunctionTokenPairs[i].pctszFunctionToken[0] && _tcslen(c) == 1)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Parser::IsOperator(TCHAR c) 
+{
+    for (UINT i = 0; i < _countof(Parser::ValidOperators); i++)
+    {
+        if (c == Parser::ValidOperators[i].pctszOperator[0])
         {
             return true;
         }
@@ -332,6 +313,51 @@ bool Parser::IsOperator(PTSTR c)
     }
 
     return false;
+}
+
+bool Parser::IsVariable(TCHAR c)
+{
+    for (UINT i = 0; i < _countof(Parser::ValidVariables); i++)
+    {
+        if (c == Parser::ValidVariables[i])
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Parser::IsVariable(PTSTR c)
+{
+    if (_tcslen(c) > 1)
+    {
+        return false;
+    }
+
+    for (UINT i = 0; i < _countof(Parser::ValidVariables); i++)
+    {
+        if (c[0] == Parser::ValidVariables[i])
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+Parser::OperatorInformation Parser::GetOperatorInformation(TCHAR c)
+{
+    for (UINT i = 0; i < _countof(Parser::ValidOperators); i++)
+    {
+        if (c == Parser::ValidOperators[i].pctszOperator[0])
+        {
+            return Parser::ValidOperators[i];
+        }
+    }
+
+    assert(1 == 0);
+    return {};
 }
 
 Parser::OperatorInformation Parser::GetOperatorInformation(PTSTR c)

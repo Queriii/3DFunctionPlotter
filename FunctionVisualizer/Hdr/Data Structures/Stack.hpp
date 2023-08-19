@@ -2,25 +2,17 @@
 
 #include "List.hpp"
 
-#include <cassert>
-
-
 
 
 template <typename Data>
 class Stack
 {
 public:
-    Stack(Stack&) = delete;
-    Stack(Stack&&) = delete;
-
-    Stack();
+    unsigned int Size() const;
 
     void Push(Data D);
     Data Pop();
     Data Peek();
-
-    unsigned int Size();
 
 private:
     List<Data> InternalList;
@@ -28,42 +20,31 @@ private:
 
 
 
+//Public
 template <typename Data>
-Stack<Data>::Stack()
+unsigned int Stack<Data>::Size() const
 {
-
+    return this->InternalList.Size();
 }
-
 
 template <typename Data>
 void Stack<Data>::Push(Data D)
 {
-    this->InternalList.Append(static_cast<Data>(D));
+    this->InternalList.Append(D);
 }
 
 template <typename Data>
 Data Stack<Data>::Pop()
 {
-    assert(InternalList.Size() > 0);
-
-    Data Output = this->InternalList[this->InternalList.Size() - 1];
+    assert(this->Size() > 0);
+    Data D = this->Peek();
     this->InternalList.RemoveLast();
-
-    return Output;
+    return D;
 }
 
 template <typename Data>
 Data Stack<Data>::Peek()
 {
-    assert(InternalList.Size() > 0);
-
-    Data Output = this->InternalList[this->InternalList.Size() - 1];
-
-    return Output;
-}
-
-template <typename Data>
-unsigned int Stack<Data>::Size()
-{
-    return this->InternalList.Size();
+    assert(this->Size() > 0);
+    return (this->InternalList[this->Size() - 1]);
 }

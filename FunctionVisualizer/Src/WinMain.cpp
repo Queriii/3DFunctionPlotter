@@ -15,7 +15,6 @@
 
 
 
-
 int WINAPI WIN_MAIN(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrev, _In_ PTSTR ptszCommandArgs, _In_ int iWindowState)
 {
     try
@@ -69,5 +68,8 @@ int WINAPI WIN_MAIN(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrev, _In_ PTS
     }
 
 
-    return (static_cast<int>(Window::WindowLoop())); 
+    int Ret = static_cast<int>(Window::WindowLoop());
+
+    D3D11::Cleanup();
+    return Ret;
 }

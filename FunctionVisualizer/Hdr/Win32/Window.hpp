@@ -1,6 +1,9 @@
 #pragma once
 
+#include "../Data Structures/List.hpp"
+
 #include <Windows.h>
+
 
 
 
@@ -17,6 +20,7 @@ typedef struct GraphFunction
     GraphFunction::Function FunctionType;
     bool                    bShowFunction;
     PCTSTR                  ptszInfixFunction;
+    List<PTSTR>             PostfixTokens;
 }GraphFunction;
 
 typedef struct GraphOptions

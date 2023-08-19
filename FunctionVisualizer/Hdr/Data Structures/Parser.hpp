@@ -12,12 +12,13 @@
 class Parser
 {
 public:
-    static bool IsValidAxisRange(_In_ PCTSTR pctszRange);
+    static bool IsValidAxisRange(PCTSTR pctszRange);
 
-    static bool IsValidParseTarget(_In_ PCTSTR pctszInfix); 
+    static bool IsValidFunction(PCTSTR pctszInfix);
 
-    static void GenerateInfixTokens(_In_ PCTSTR pctszInfix, _Out_ List<PTSTR>& Tokens);
-    static void InfixToPostfix(_In_ List<PTSTR>& InfixTokens, _Out_ List<PTSTR>& PostfixTokens);
+    static void GenerateInfixTokens(PCTSTR pctszInfix, List<PTSTR>& Tokens);
+    static void InfixToPostfix(PCTSTR pctszInfix, List<PTSTR>& PostfixTokens);
+
 
 private:
     typedef struct FunctionTokenPair
@@ -50,13 +51,25 @@ private:
         {__TEXT("^"), 4, false}
     };
 
+    static constexpr TCHAR ValidVariables[] =
+    {
+        __TEXT('x'), __TEXT('z')
+    };
+
 
     static bool IsValidSymbol(TCHAR c);
     static bool IsValidParenthesis(PCTSTR pctszInfixNotation);
+    static bool IsValidSequence(PCTSTR pctszInfixNotation);
 
+    static bool IsNumber(TCHAR c);
     static bool IsNumber(PTSTR c);
+    static bool IsFunction(TCHAR c);
     static bool IsFunction(PTSTR c);
+    static bool IsOperator(TCHAR c);
     static bool IsOperator(PTSTR c);
+    static bool IsVariable(TCHAR c);
+    static bool IsVariable(PTSTR c);
 
+    static Parser::OperatorInformation GetOperatorInformation(TCHAR c);
     static Parser::OperatorInformation GetOperatorInformation(PTSTR c);
 };

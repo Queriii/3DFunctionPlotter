@@ -1,54 +1,32 @@
 #pragma once
 
-#include <Windows.h>
+#include <memory.h>
 #include <cassert>
 
 
-
-
-template <typename Data>
-using _RefComparisonCallback = bool(*)(Data& A, Data& B);
-template <typename Data>
-using _ComparisonCallback = bool(*)(Data A, Data B);
 
 template <typename Data>
 class List
 {
 public:
-    List(List&) = delete;
-    List(List&&) = delete;
-
     List();
     ~List();
 
 
-    enum DynamicElementType
-    {
-        None,
-        Single,
-        Array
-    };
-    void SetCleanupDynamicElementsType(DynamicElementType Type);
-
-    unsigned int    Size() const;
-
-    void    Append(Data& D);
-    void    Append(Data D);
-
-    void RemoveLast();
-
-    unsigned int Suffices(_RefComparisonCallback<Data> pfnCheck, Data& B);
-    unsigned int Suffices(_ComparisonCallback<Data> pfnCheck, Data B);
-
     Data& operator[](int iIndex);
+
+    unsigned int Size() const;
+
+    void Append(Data);
+
+    bool RemoveLast();
+    bool RemoveAll();
 
 private:
     Data* pArray;
     unsigned int    uiNumElements;
-    unsigned int    uiCurrentElementMax;
-
-    List::DynamicElementType DynamicType;
-
+    unsigned int    uiNumMaxElements;
+    unsigned int    uiNumStartingElements;
 
     bool Resize();
 
@@ -57,29 +35,18 @@ private:
 
 
 
+
 //Cnstrct & Dstrct
 template <typename Data>
 List<Data>::List()
-    : uiNumElements(NULL), uiCurrentElementMax(4), DynamicType(List::DynamicElementType::None)
+    : pArray(nullptr), uiNumElements(0), uiNumMaxElements(0), uiNumStartingElements(4)
 {
-    this->pArray = new Data[this->uiCurrentElementMax]{};
-    if (!(this->pArray))
-    {
-        return;
-    }
+    assert(this->uiNumStartingElements != 0);
 }
 
 template <typename Data>
 List<Data>::~List()
 {
-    if (this->DynamicType != 0)
-    {
-        for (UINT i = 0; i < this->uiNumElements; i++)
-        {
-            (this->DynamicType == List::DynamicElementType::Single) ? delete reinterpret_cast<void*>(this->pArray[i]) : delete[] reinterpret_cast<void*>(this->pArray[i]);
-        }
-    }
-
     if (this->pArray)
     {
         delete[] this->pArray;
@@ -91,9 +58,10 @@ List<Data>::~List()
 
 //Public
 template <typename Data>
-void List<Data>::SetCleanupDynamicElementsType(DynamicElementType Type)
+Data& List<Data>::operator[](int iIndex)
 {
-    this->DynamicType = Type;
+    assert(iIndex >= 0);
+    return this->Get(static_cast<unsigned int>(iIndex));
 }
 
 template <typename Data>
@@ -103,91 +71,46 @@ unsigned int List<Data>::Size() const
 }
 
 template <typename Data>
-void List<Data>::Append(Data& D)
-{
-    if (this->uiNumElements >= this->uiCurrentElementMax)
-    {
-        if (!(this->Resize()))
-        {
-            assert(1 == 0);
-            return;
-        }
-    }
-
-    memcpy_s(this->pArray + this->uiNumElements, this->uiCurrentElementMax * sizeof(Data), &D, sizeof(Data));
-
-    this->uiNumElements++;
-}
-
-template <typename Data>
 void List<Data>::Append(Data D)
 {
-    if (this->uiNumElements >= this->uiCurrentElementMax)
+    if (this->uiNumElements == this->uiNumMaxElements)
     {
-        if (!(this->Resize()))
+        if (!this->Resize())
         {
-            assert(1 == 0);
-            return;
+            //Throw
         }
     }
 
-    memcpy_s(this->pArray + this->uiNumElements, this->uiCurrentElementMax * sizeof(Data), &D, sizeof(Data));
-
+    this->pArray[this->uiNumElements] = D;
     this->uiNumElements++;
 }
 
 template <typename Data>
-void List<Data>::RemoveLast()
+bool List<Data>::RemoveLast()
 {
-    assert(this->uiNumElements != 0);
+    if (!this->uiNumElements)
+    {
+        return false;
+    }
+
+    this->pArray[this->uiNumElements - 1] = NULL;
     this->uiNumElements--;
+
+    return true;
 }
 
 template <typename Data>
-unsigned int List<Data>::Suffices(_RefComparisonCallback<Data> pfnCheck, Data& B)
+bool List<Data>::RemoveAll()
 {
-    if (!pfnCheck)
+    if (!this->uiNumElements)
     {
-        return -1;
+        return false;
     }
 
-    for (unsigned int i = 0; i < this->uiNumElements; i++)
-    {
-        if (pfnCheck(this->Get(i), B))
-        {
-            return i;
-        }
-    }
+    while (this->RemoveLast());
 
-    return -1;
+    return true;
 }
-
-template <typename Data>
-unsigned int List<Data>::Suffices(_ComparisonCallback<Data> pfnCheck, Data B)
-{
-    if (!pfnCheck)
-    {
-        return -1;
-    }
-
-    for (unsigned int i = 0; i < this->uiNumElements; i++)
-    {
-        if (pfnCheck(this->Get(i), B))
-        {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-
-template <typename Data>
-Data& List<Data>::operator[](int iIndex)
-{
-    return (this->Get(iIndex));
-}
-
 
 
 
@@ -195,30 +118,42 @@ Data& List<Data>::operator[](int iIndex)
 template <typename Data>
 bool List<Data>::Resize()
 {
-    assert(this->uiCurrentElementMax != 0);
-    this->uiCurrentElementMax *= 2;
-
-    Data* pNewArray = new Data[this->uiCurrentElementMax]{};
-    if (!pNewArray)
+    if (!this->uiNumMaxElements)
     {
-        return false;
+        this->uiNumMaxElements = this->uiNumStartingElements;
+        this->pArray = new Data[this->uiNumMaxElements];
+        if (!this->pArray)
+        {
+            //Set Exception Info
+            return false;
+        }
+        memset(this->pArray, NULL, uiNumMaxElements * sizeof(Data));
+
+        return true;
     }
-    memcpy_s(pNewArray, this->uiCurrentElementMax * sizeof(Data), this->pArray, this->uiNumElements * sizeof(Data));
-
-    if (this->pArray)
+    else
     {
+        unsigned int uiNewNumMaxElements = this->uiNumMaxElements * 2;
+        Data* pNewArray = new Data[uiNewNumMaxElements];
+        if (!pNewArray)
+        {
+            //Set Exception Info
+            return false;
+        }
+        memset(pNewArray, NULL, uiNewNumMaxElements * sizeof(Data));
+
+        memcpy_s(pNewArray, uiNewNumMaxElements * sizeof(Data), this->pArray, this->uiNumElements * sizeof(Data));
         delete[] this->pArray;
+        this->pArray = pNewArray;
+        this->uiNumMaxElements = uiNewNumMaxElements;
+
+        return true;
     }
-    this->pArray = pNewArray;
-
-    return true;
 }
-
 
 template <typename Data>
 Data& List<Data>::Get(unsigned int uiIndex) const
 {
-    assert(uiIndex < uiNumElements);
-
+    assert(uiIndex < this->uiNumElements);
     return (this->pArray[uiIndex]);
 }

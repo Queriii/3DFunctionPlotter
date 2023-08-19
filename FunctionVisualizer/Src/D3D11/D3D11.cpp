@@ -319,3 +319,14 @@ ID3D11DepthStencilView* D3D11::GetSCDepthStencilBufferDSV()
     assert(D3D11::cpSCDepthStencilBufferDSV != nullptr && D3D11::cpSCDepthStencilBufferDSV.Get() != nullptr);
     return (D3D11::cpSCDepthStencilBufferDSV.Get());
 }
+
+void D3D11::Cleanup()
+{
+    for (UINT i = 0; i < D3D11::Fragments.Size(); i++)
+    {
+        if (D3D11::Fragments[i])
+        {
+            delete D3D11::Fragments[i];
+        }
+    }
+}

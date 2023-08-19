@@ -27,6 +27,8 @@ public:
     static ID3D11RenderTargetView*  GetSCBackBufferRTV();
     static ID3D11DepthStencilView*  GetSCDepthStencilBufferDSV();
 
+    static void Cleanup();
+
 private:
     static Microsoft::WRL::ComPtr<ID3D11Device>        cpDevice;
     static Microsoft::WRL::ComPtr<ID3D11DeviceContext> cpDeviceContext;

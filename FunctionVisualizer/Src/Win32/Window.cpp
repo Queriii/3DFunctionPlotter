@@ -444,7 +444,7 @@ INT_PTR _stdcall Window::GraphFunctionDlgMessageHandler(HWND hwndDlg, UINT uiMes
 
         //Verify function input
         SetWindowText(GetDlgItem(hwndDlg, IDC_EDIT_INPUTFUNCTION), pGraphFunctionConfig->ptszInfixFunction);
-        if (Parser::IsValidParseTarget(pGraphFunctionConfig->ptszInfixFunction))
+        if (Parser::IsValidFunction(pGraphFunctionConfig->ptszInfixFunction))
         {
             ShowWindow(GetDlgItem(hwndDlg, IDC_STATIC_INVALIDFUNCTIONTYPE), SW_HIDE);
             EnableWindow(GetDlgItem(hwndDlg, IDC_GF_BUTTON_SAVE), TRUE);
@@ -498,7 +498,6 @@ INT_PTR _stdcall Window::GraphFunctionDlgMessageHandler(HWND hwndDlg, UINT uiMes
                         AdditionalExceptionInformation::SetErrorLocation(__FILE__, __LINE__);
                         throw Exception_GraphFunction();
                     }
-
                     GetWindowText(GetDlgItem(hwndDlg, IDC_EDIT_INPUTFUNCTION), ptszFunction, iEditFunctionLength + 1);
 
                     assert(pGraphFunctionConfig->ptszInfixFunction != nullptr);
@@ -513,6 +512,13 @@ INT_PTR _stdcall Window::GraphFunctionDlgMessageHandler(HWND hwndDlg, UINT uiMes
                     pGraphFunctionConfig->ptszInfixFunction = ptszFunction;
                     pGraphFunctionConfig->FunctionType      = CurrentFunctionType;
                     pGraphFunctionConfig->bShowFunction     = (SendMessage(GetDlgItem(hwndDlg, IDC_CHECK_DISPLAYFUNCTION), BM_GETCHECK, NULL, NULL) == BST_CHECKED) ? true : false;
+                    
+                    for (UINT i = 0; i < pGraphFunctionConfig->PostfixTokens.Size(); i++)
+                    {
+                        delete[] pGraphFunctionConfig->PostfixTokens[i];
+                        assert(pGraphFunctionConfig->PostfixTokens.RemoveAll() != false);
+                    }
+                    Parser::InfixToPostfix(pGraphFunctionConfig->ptszInfixFunction, pGraphFunctionConfig->PostfixTokens);
                 }
 
                 EndDialog(hwndDlg, (LOWORD(wParam) == IDC_GF_BUTTON_SAVE) ? 1 : 0); 
@@ -538,7 +544,7 @@ INT_PTR _stdcall Window::GraphFunctionDlgMessageHandler(HWND hwndDlg, UINT uiMes
                 }
                 GetWindowText(GetDlgItem(hwndDlg, IDC_EDIT_INPUTFUNCTION), ptszFunction, iEditFunctionLength + 1);
                 
-                if (Parser::IsValidParseTarget(ptszFunction))
+                if (Parser::IsValidFunction(ptszFunction))
                 {
                     ShowWindow(GetDlgItem(hwndDlg, IDC_STATIC_INVALIDFUNCTIONTYPE), SW_HIDE);
                     EnableWindow(GetDlgItem(hwndDlg, IDC_GF_BUTTON_SAVE), TRUE);
