@@ -1,6 +1,5 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
-#include <WICTextureLoader.h>
 
 #include "../../../Hdr/D3D11/Fragments/TwoVarFunction.hpp"
 #include "../../../Hdr/D3D11/D3D11Camera.hpp"
