@@ -10,17 +10,10 @@
 
 typedef struct GraphFunction
 {
-    enum Function 
-    {
-        SingleVariable,
-        TwoVariable
-    };
-
     bool bFirstInitialization;      //Used for proper memory cleanup.
-
-    GraphFunction::Function FunctionType;
     bool                    bShowFunction;
     PCTSTR                  ptszInfixFunction;
+    unsigned int            uiLevelOfDetail;
 }GraphFunction;
 
 typedef struct GraphOptions

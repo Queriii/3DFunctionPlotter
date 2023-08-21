@@ -35,10 +35,9 @@ double Window::dTimeToRenderPreviousFrame = 0.0;
 GraphFunction Window::GraphFunctionConfig =
 {
     true,
-
-    GraphFunction::Function::TwoVariable,
     false,
-    new TCHAR[_tcslen(__TEXT("x+z"))]{__TEXT('x'), __TEXT('+'), __TEXT('z'), __TEXT('\0')}
+    new TCHAR[_tcslen(__TEXT("x+z"))]{__TEXT('x'), __TEXT('+'), __TEXT('z'), __TEXT('\0')},
+    1
 };
 GraphOptions Window::GraphOptionsConfig =
 {
@@ -439,8 +438,6 @@ LRESULT _stdcall Window::Win32MessageHandler(HWND hwndWindow, UINT uiMessage, WP
 
 INT_PTR _stdcall Window::GraphFunctionDlgMessageHandler(HWND hwndDlg, UINT uiMessage, WPARAM wParam, LPARAM lParam)
 {
-    static constexpr int            FunctionTypeRadioButtons[2] = { IDC_RADIO_SINGLEVARIABLE, IDC_RADIO_TWOVARIABLE };
-    static GraphFunction::Function  CurrentFunctionType;
     static GraphFunction*           pGraphFunctionConfig;
 
     switch (uiMessage)
@@ -453,13 +450,6 @@ INT_PTR _stdcall Window::GraphFunctionDlgMessageHandler(HWND hwndDlg, UINT uiMes
 
 
         //Set function descriptors
-        CurrentFunctionType = pGraphFunctionConfig->FunctionType;
-        if (!CheckRadioButton(hwndDlg, IDC_RADIO_SINGLEVARIABLE, IDC_RADIO_TWOVARIABLE, FunctionTypeRadioButtons[pGraphFunctionConfig->FunctionType]))
-        {
-            AdditionalExceptionInformation::SetLastErrorCode(AdditionalExceptionInformation::AdditionalExceptionInformationIndices::_CheckRadioButtons);
-            AdditionalExceptionInformation::SetErrorLocation(__FILE__, __LINE__);
-            throw Exception_GraphFunction();
-        }
         SendMessage(GetDlgItem(hwndDlg, IDC_CHECK_DISPLAYFUNCTION), BM_SETCHECK, (pGraphFunctionConfig->bShowFunction) ? BST_CHECKED : BST_UNCHECKED, NULL);
 
 
@@ -477,6 +467,11 @@ INT_PTR _stdcall Window::GraphFunctionDlgMessageHandler(HWND hwndDlg, UINT uiMes
         }
 
 
+        LPARAM lpLevelOfDetailRange = MAKELPARAM(1, 10);
+        SendMessage(GetDlgItem(hwndDlg, IDC_SLIDER_LEVELOFDETAIL), TBM_SETRANGE, FALSE, lpLevelOfDetailRange);
+        SendMessage(GetDlgItem(hwndDlg, IDC_SLIDER_LEVELOFDETAIL), TBM_SETPOS, TRUE, static_cast<LPARAM>(pGraphFunctionConfig->uiLevelOfDetail));
+
+
         return TRUE;
     }
 
@@ -484,25 +479,6 @@ INT_PTR _stdcall Window::GraphFunctionDlgMessageHandler(HWND hwndDlg, UINT uiMes
     {
         switch (LOWORD(wParam))
         {
-
-        case IDC_RADIO_SINGLEVARIABLE:
-        {
-            if (HIWORD(wParam) == BN_CLICKED)
-            {
-                CurrentFunctionType = GraphFunction::Function::SingleVariable;
-            }
-
-            break;
-        }
-
-        case IDC_RADIO_TWOVARIABLE:
-        {
-            if (HIWORD(wParam) == BN_CLICKED)
-            {
-                CurrentFunctionType = GraphFunction::Function::TwoVariable;
-            }
-            break;
-        }
 
         case IDC_GF_BUTTON_CANCEL:
         case IDC_GF_BUTTON_SAVE:
@@ -531,8 +507,9 @@ INT_PTR _stdcall Window::GraphFunctionDlgMessageHandler(HWND hwndDlg, UINT uiMes
                         pGraphFunctionConfig->bFirstInitialization = false;
                     }
                     pGraphFunctionConfig->ptszInfixFunction = ptszFunction;
-                    pGraphFunctionConfig->FunctionType      = CurrentFunctionType;
                     pGraphFunctionConfig->bShowFunction     = (SendMessage(GetDlgItem(hwndDlg, IDC_CHECK_DISPLAYFUNCTION), BM_GETCHECK, NULL, NULL) == BST_CHECKED) ? true : false;
+
+                    pGraphFunctionConfig->uiLevelOfDetail = static_cast<UINT>(SendMessage(GetDlgItem(hwndDlg, IDC_SLIDER_LEVELOFDETAIL), TBM_GETPOS, NULL, NULL));
                 }
 
                 EndDialog(hwndDlg, (LOWORD(wParam) == IDC_GF_BUTTON_SAVE) ? 1 : 0); 

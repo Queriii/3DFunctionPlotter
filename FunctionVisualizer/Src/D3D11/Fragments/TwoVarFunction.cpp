@@ -149,7 +149,7 @@ bool TwoVarFunction::InitializeFragment()
 
         D3D11_RASTERIZER_DESC RasterizerStateDesc =
         {
-            D3D11_FILL_SOLID, 
+            D3D11_FILL_WIREFRAME, 
             D3D11_CULL_NONE,
             FALSE,
             NULL,
@@ -435,23 +435,76 @@ void TwoVarFunction::CreatePlane(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Li
     PlaneVertices.RemoveAll();
     PlaneIndices.RemoveAll();
 
+    GraphFunction GraphFunctionConfig = Window::GetGraphFunctionConfig();
     
     for (int i = -static_cast<int>(uiRangeZ); i <= static_cast<int>(uiRangeZ); i++)
     {
-        for (int j = -static_cast<int>(uiRangeX); j <= static_cast<int>(uiRangeX); j++)
+        if (i == static_cast<int>(uiRangeZ))
         {
-            TwoVarFunction::Vertex Current;
-            Current.f3LocalPosition = DirectX::XMFLOAT3(static_cast<float>(j), TwoVarFunction::EvaluateFunction(static_cast<float>(j), static_cast<float>(i)), static_cast<float>(i));
-            Current.f3Color         = DirectX::XMFLOAT3(0.0f, 0.6f, 0.4f);
+            for (int j = -static_cast<int>(uiRangeX); j <= static_cast<int>(uiRangeX); j++)
+            {
+                if (j == static_cast<int>(uiRangeX))
+                {
+                    TwoVarFunction::Vertex Current; 
+                    Current.f3LocalPosition = DirectX::XMFLOAT3(static_cast<float>(j), TwoVarFunction::EvaluateFunction(static_cast<float>(j), static_cast<float>(i)), static_cast<float>(i)); 
+                    Current.f3Color         = DirectX::XMFLOAT3(0.0f, 0.6f, 0.4f); 
 
-            this->PlaneVertices.Append(Current);
+                    this->PlaneVertices.Append(Current); 
+                }
+                else
+                {
+                    for (int subX = 0; subX < static_cast<int>(GraphFunctionConfig.uiLevelOfDetail); subX++)
+                    {
+                        TwoVarFunction::Vertex Current; 
+                        Current.f3LocalPosition = DirectX::XMFLOAT3(static_cast<float>(j) + static_cast<float>(subX) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail), TwoVarFunction::EvaluateFunction(static_cast<float>(j) + static_cast<float>(subX) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail), static_cast<float>(i)), static_cast<float>(i));
+                        Current.f3Color         = DirectX::XMFLOAT3(0.0f, 0.6f, 0.4f); 
+
+                        this->PlaneVertices.Append(Current); 
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int subZ = 0; subZ < static_cast<int>(GraphFunctionConfig.uiLevelOfDetail); subZ++) 
+            { 
+                for (int j = -static_cast<int>(uiRangeX); j <= static_cast<int>(uiRangeX); j++) 
+                {
+                    if (j == static_cast<int>(uiRangeX))
+                    {
+                        TwoVarFunction::Vertex Current; 
+                        Current.f3LocalPosition = DirectX::XMFLOAT3(static_cast<float>(j), TwoVarFunction::EvaluateFunction(static_cast<float>(j), static_cast<float>(i) + static_cast<float>(subZ) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail)), static_cast<float>(i) + static_cast<float>(subZ) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail));
+                        Current.f3Color         = DirectX::XMFLOAT3(0.0f, 0.6f, 0.4f);
+
+                        this->PlaneVertices.Append(Current); 
+                    }
+                    else
+                    {
+                        for (int subX = 0; subX < static_cast<int>(GraphFunctionConfig.uiLevelOfDetail); subX++) 
+                        {
+                            TwoVarFunction::Vertex Current; 
+                            Current.f3LocalPosition = DirectX::XMFLOAT3(static_cast<float>(j) + static_cast<float>(subX) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail), TwoVarFunction::EvaluateFunction(static_cast<float>(j) + static_cast<float>(subX) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail), static_cast<float>(i) + static_cast<float>(subZ) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail)), static_cast<float>(i) + static_cast<float>(subZ) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail)); 
+                            Current.f3Color = DirectX::XMFLOAT3(0.0f, 0.6f, 0.4f);
+
+                            this->PlaneVertices.Append(Current);
+                        }
+                    }
+                }
+            }
         }
     }
 
-    unsigned int uiNumVerticesPerRow = (2 * uiRangeX) + 1;
-    for (int i = 0; i < (2 * static_cast<int>(uiRangeZ)); i++)
+    unsigned int uiOrigNumVerticesPerRow    = (2 * uiRangeX) + 1;
+    unsigned int uiOrigNumBoxesPerRow       = uiOrigNumVerticesPerRow - 1;
+    unsigned int uiNumVerticesPerRow        = (uiOrigNumBoxesPerRow * GraphFunctionConfig.uiLevelOfDetail) + 1;
+
+    unsigned int uiOrigNumVerticesPerCol    = (2 * uiRangeZ) + 1;
+    unsigned int uiOrigNumBoxesPerCol       = uiOrigNumVerticesPerCol - 1;
+    unsigned int uiNumVerticesPerCol        = (uiOrigNumBoxesPerCol * GraphFunctionConfig.uiLevelOfDetail) + 1;
+
+    for (int i = 0; i < static_cast<int>(uiNumVerticesPerCol - 1); i++)
     {
-        for (int j = 0; j < (2 * static_cast<int>(uiRangeX)); j++)
+        for (int j = 0; j < static_cast<int>(uiNumVerticesPerRow - 1); j++)
         {
             this->PlaneIndices.Append((i * uiNumVerticesPerRow) + j);
             this->PlaneIndices.Append(((i + 1) * uiNumVerticesPerRow) + j);
@@ -535,7 +588,7 @@ float TwoVarFunction::EvaluateFunction(float fX, float fZ)
 
                 PTSTR   ptszNumber1   = OperandStack.Pop();
                 PTSTR   ptszNumber2   = OperandStack.Pop();
-                float   fRes          = static_cast<float>(_ttof(ptszNumber1)) + static_cast<float>(_ttof(ptszNumber2));
+                float   fRes          = static_cast<float>(_ttof(ptszNumber2)) + static_cast<float>(_ttof(ptszNumber1));
                 int     iSize         = _sntprintf(nullptr, NULL, __TEXT("%f"), fRes);
                 assert(iSize > 0); 
 
@@ -556,7 +609,7 @@ float TwoVarFunction::EvaluateFunction(float fX, float fZ)
 
                 PTSTR   ptszNumber1 = OperandStack.Pop();
                 PTSTR   ptszNumber2 = OperandStack.Pop();
-                float   fRes        = static_cast<float>(_ttof(ptszNumber1)) - static_cast<float>(_ttof(ptszNumber2));
+                float   fRes        = static_cast<float>(_ttof(ptszNumber2)) - static_cast<float>(_ttof(ptszNumber1)); 
                 int     iSize       = _sntprintf(nullptr, NULL, __TEXT("%f"), fRes);
                 assert(iSize > 0);
 
@@ -577,7 +630,7 @@ float TwoVarFunction::EvaluateFunction(float fX, float fZ)
 
                 PTSTR   ptszNumber1 = OperandStack.Pop();
                 PTSTR   ptszNumber2 = OperandStack.Pop();
-                float   fRes        = static_cast<float>(_ttof(ptszNumber1)) * static_cast<float>(_ttof(ptszNumber2));
+                float   fRes        = static_cast<float>(_ttof(ptszNumber2)) * static_cast<float>(_ttof(ptszNumber1));
                 int     iSize       = _sntprintf(nullptr, NULL, __TEXT("%f"), fRes);
                 assert(iSize > 0);
 
@@ -598,7 +651,7 @@ float TwoVarFunction::EvaluateFunction(float fX, float fZ)
 
                 PTSTR   ptszNumber1 = OperandStack.Pop();
                 PTSTR   ptszNumber2 = OperandStack.Pop();
-                float   fRes        = static_cast<float>(_ttof(ptszNumber1)) / static_cast<float>(_ttof(ptszNumber2));
+                float   fRes        = static_cast<float>(_ttof(ptszNumber2)) / static_cast<float>(_ttof(ptszNumber1));
                 int     iSize       = _sntprintf(nullptr, NULL, __TEXT("%f"), fRes);
                 assert(iSize > 0);
 
@@ -619,7 +672,7 @@ float TwoVarFunction::EvaluateFunction(float fX, float fZ)
 
                 PTSTR   ptszNumber1 = OperandStack.Pop(); 
                 PTSTR   ptszNumber2 = OperandStack.Pop(); 
-                float   fRes        = powf(static_cast<float>(_ttof(ptszNumber1)), static_cast<float>(_ttof(ptszNumber2)));
+                float   fRes        = powf(static_cast<float>(_ttof(ptszNumber2)), static_cast<float>(_ttof(ptszNumber1)));
                 int     iSize       = _sntprintf(nullptr, NULL, __TEXT("%f"), fRes);
                 assert(iSize > 0);
 
@@ -678,8 +731,6 @@ float TwoVarFunction::EvaluateFunction(float fX, float fZ)
             _tcscpy_s(ptszRes, ullLength + 1, this->PostfixTokens[i]);
 
             OperandStack.Push(ptszRes);
-
-            break;
         }
         else
         {
