@@ -1,9 +1,6 @@
 #pragma once
 
-#include <d3d11.h>
-#include <d3dcompiler.h>
 #include <DirectXMath.h>
-#include <vector>
 
 #include "../D3D11Fragment.hpp"
 #include "../D3D11.hpp"
@@ -21,6 +18,7 @@ public:
     bool InitializeFragment() override;
     bool DrawFragment() override;
     bool GraphOptionsUpdated() override;
+    bool GraphFunctionUpdated() override;
 
     enum GridType
     {
@@ -52,12 +50,12 @@ private:
     }PixelGridType;
 
 
-    std::vector<CartesianGrid::Vertex>  vecaXZGridVertices;
-    std::vector<DWORD>                  vecaXZGridIndices; 
-    std::vector<CartesianGrid::Vertex>  vecaXYGridVertices;
-    std::vector<DWORD>                  vecaXYGridIndices;
-    std::vector<CartesianGrid::Vertex>  vecaZYGridVertices;
-    std::vector<DWORD>                  vecaZYGridIndices;
+    List<CartesianGrid::Vertex> XZGridVertices;
+    List<DWORD>                 XZGridIndices;
+    List<CartesianGrid::Vertex> XYGridVertices;
+    List<DWORD>                 XYGridIndices;
+    List<CartesianGrid::Vertex> ZYGridVertices;
+    List<DWORD>                 ZYGridIndices;
 
 
     Microsoft::WRL::ComPtr<ID3D11InputLayout>   cpInputLayout;

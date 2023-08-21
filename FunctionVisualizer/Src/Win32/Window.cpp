@@ -38,7 +38,7 @@ GraphFunction Window::GraphFunctionConfig =
 
     GraphFunction::Function::TwoVariable,
     false,
-    __TEXT("x + z")
+    new TCHAR[_tcslen(__TEXT("x+z"))]{__TEXT('x'), __TEXT('+'), __TEXT('z'), __TEXT('\0')}
 };
 GraphOptions Window::GraphOptionsConfig =
 {
@@ -191,6 +191,24 @@ GraphFunction Window::GetGraphFunctionConfig()
 GraphOptions Window::GetGraphOptionsConfig()
 {
     return Window::GraphOptionsConfig;
+}
+
+GraphFunction* Window::GetGraphFunctionConfigPtr()
+{
+    return &(Window::GraphFunctionConfig);
+}
+
+GraphOptions* Window::GetGraphOptionsConfigPtr()
+{
+    return &(Window::GraphOptionsConfig);
+}
+
+void Window::Cleanup()
+{
+    if (!Window::GraphFunctionConfig.bFirstInitialization)
+    {
+        delete[] Window::GraphFunctionConfig.ptszInfixFunction;
+    }
 }
 
 
@@ -359,7 +377,10 @@ LRESULT _stdcall Window::Win32MessageHandler(HWND hwndWindow, UINT uiMessage, WP
                 {
                     if (static_cast<bool>(DialogBoxParam(reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hwndWindow, GWLP_HINSTANCE)), MAKEINTRESOURCE(IDD_GRAPH_FUNCTION), hwndWindow, Window::GraphFunctionDlgMessageHandler, reinterpret_cast<LPARAM>(&(Window::GraphFunctionConfig)))))
                     {
-
+                        if (!Window::pUpdateFragments(UpdateTypes::GraphFunctionUpdate))
+                        {
+                            throw Exception_D3D11FragmentUpdate();
+                        }
                     }
                 }
                 catch (GenericException& Exception)
@@ -377,7 +398,7 @@ LRESULT _stdcall Window::Win32MessageHandler(HWND hwndWindow, UINT uiMessage, WP
                 {
                     if (static_cast<bool>(DialogBoxParam(reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hwndWindow, GWLP_HINSTANCE)), MAKEINTRESOURCE(IDD_GRAPH_OPTIONS), hwndWindow, Window::GraphOptionsDlgMessageHandler, reinterpret_cast<LPARAM>(&(Window::GraphOptionsConfig)))))
                     {
-                        if (!Window::pUpdateFragments())
+                        if (!Window::pUpdateFragments(UpdateTypes::GraphOptionsUpdate))
                         {
                             throw Exception_D3D11FragmentUpdate();
                         }
@@ -512,13 +533,6 @@ INT_PTR _stdcall Window::GraphFunctionDlgMessageHandler(HWND hwndDlg, UINT uiMes
                     pGraphFunctionConfig->ptszInfixFunction = ptszFunction;
                     pGraphFunctionConfig->FunctionType      = CurrentFunctionType;
                     pGraphFunctionConfig->bShowFunction     = (SendMessage(GetDlgItem(hwndDlg, IDC_CHECK_DISPLAYFUNCTION), BM_GETCHECK, NULL, NULL) == BST_CHECKED) ? true : false;
-                    
-                    for (UINT i = 0; i < pGraphFunctionConfig->PostfixTokens.Size(); i++)
-                    {
-                        delete[] pGraphFunctionConfig->PostfixTokens[i];
-                        assert(pGraphFunctionConfig->PostfixTokens.RemoveAll() != false);
-                    }
-                    Parser::InfixToPostfix(pGraphFunctionConfig->ptszInfixFunction, pGraphFunctionConfig->PostfixTokens);
                 }
 
                 EndDialog(hwndDlg, (LOWORD(wParam) == IDC_GF_BUTTON_SAVE) ? 1 : 0); 
@@ -697,9 +711,9 @@ INT_PTR _stdcall Window::GraphOptionsDlgMessageHandler(HWND hwndDlg, UINT uiMess
                     pGraphOptionsConfig->uiRangeZAxis = static_cast<UINT>(_ttoi(ptszRangeAxis));
                     ZeroMemory(ptszRangeAxis, _countof(ptszRangeAxis) * sizeof(TCHAR));
 
-                    pGraphOptionsConfig->bFreecamMovement = static_cast<bool>((SendMessage(GetDlgItem(hwndDlg, IDC_CHECK_CAMERA_FREECAM), BM_GETCHECK, NULL, NULL)));
-                    pGraphOptionsConfig->uiCameraSpeed = static_cast<UINT>(SendMessage(GetDlgItem(hwndDlg, IDC_SLIDER_CAMERA_SPEED), TBM_GETPOS, NULL, NULL));
-                    pGraphOptionsConfig->uiCameraSensitivity = static_cast<UINT>(SendMessage(GetDlgItem(hwndDlg, IDC_SLIDER_CAMERA_SENSITIVITY), TBM_GETPOS, NULL, NULL));
+                    pGraphOptionsConfig->bFreecamMovement       = static_cast<bool>((SendMessage(GetDlgItem(hwndDlg, IDC_CHECK_CAMERA_FREECAM), BM_GETCHECK, NULL, NULL)));
+                    pGraphOptionsConfig->uiCameraSpeed          = static_cast<UINT>(SendMessage(GetDlgItem(hwndDlg, IDC_SLIDER_CAMERA_SPEED), TBM_GETPOS, NULL, NULL));
+                    pGraphOptionsConfig->uiCameraSensitivity    = static_cast<UINT>(SendMessage(GetDlgItem(hwndDlg, IDC_SLIDER_CAMERA_SENSITIVITY), TBM_GETPOS, NULL, NULL));
 
                     pGraphOptionsConfig->bShowCartesianAxis = (SendMessage(GetDlgItem(hwndDlg, IDC_CHECK_SHOWCARTESIANAXIS), BM_GETCHECK, NULL, NULL));
                     pGraphOptionsConfig->bShowCartesianGrid = (SendMessage(GetDlgItem(hwndDlg, IDC_CHECK_SHOWCARTESIANGRID), BM_GETCHECK, NULL, NULL));

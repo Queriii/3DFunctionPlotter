@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Data Structures/List.hpp"
+#include "UpdateTypes.hpp"
 
 #include <Windows.h>
 
@@ -20,7 +21,6 @@ typedef struct GraphFunction
     GraphFunction::Function FunctionType;
     bool                    bShowFunction;
     PCTSTR                  ptszInfixFunction;
-    List<PTSTR>             PostfixTokens;
 }GraphFunction;
 
 typedef struct GraphOptions
@@ -37,7 +37,7 @@ typedef struct GraphOptions
 
 typedef bool(*_ExitSizeMove)(int cxClientWidth, int cyClientHeight);
 typedef bool(*_RenderFrame)();
-typedef bool(*_UpdateFragments)();
+typedef bool(*_UpdateFragments)(UpdateTypes Type); 
 typedef bool(*_UpdateCameraSettings)();
 typedef void(*_UpdateCameraOrientation)(float fDeltaPitch, float fDeltaYaw, float fDeltaRoll, bool bDegrees);
 
@@ -50,6 +50,7 @@ public:
     static bool RegisterWindow(PCTSTR pctszWindowTitle, int cxWindowWidth, int cyWindowHeight);
     static bool RegisterCallbacks(_ExitSizeMove pExitSizeMove, _RenderFrame pRenderFrame, _UpdateFragments pUpdateFragments, _UpdateCameraSettings pUpdateCameraSettings, _UpdateCameraOrientation pUpdateCameraOrientation);
 
+
     static WPARAM WindowLoop();
 
     static WNDCLASS         GetWindowClass();
@@ -57,7 +58,11 @@ public:
     static int              GetClientWidth();
     static int              GetClientHeight();
     static GraphFunction    GetGraphFunctionConfig();
+    static GraphFunction*   GetGraphFunctionConfigPtr();
     static GraphOptions     GetGraphOptionsConfig();
+    static GraphOptions*    GetGraphOptionsConfigPtr();
+
+    static void Cleanup();
 
 private:
     static WNDCLASS wcWindowClass;

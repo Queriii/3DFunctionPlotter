@@ -220,14 +220,33 @@ bool D3D11::RegisterFragment(D3D11Fragment* pFragment)
     return true;
 }
 
-bool D3D11::UpdateFragments()
+bool D3D11::UpdateFragments(UpdateTypes Type)
 {
     for (UINT i = 0; i < D3D11::Fragments.Size(); i++)
     {
-        if (!D3D11::Fragments[i]->GraphOptionsUpdated())
+        switch (Type)
         {
-            return false;
+
+        case UpdateTypes::GraphOptionsUpdate:
+        {
+            if (!D3D11::Fragments[i]->GraphOptionsUpdated())
+            {
+                return false;
+            }
+            break;
         }
+
+        case UpdateTypes::GraphFunctionUpdate:
+        {
+            if (!D3D11::Fragments[i]->GraphFunctionUpdated())
+            {
+                return false;
+            }
+            break;
+        }
+
+        }
+
     }
 
     return true;

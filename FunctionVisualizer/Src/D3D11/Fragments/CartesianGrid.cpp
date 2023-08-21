@@ -3,6 +3,9 @@
 #include "../../../Hdr/D3D11/D3D11Camera.hpp"
 #include "../../../Hdr/Exceptions/Exceptions.hpp"
 
+#include <d3d11.h>
+#include <d3dcompiler.h>
+
 
 
 
@@ -67,7 +70,7 @@ bool CartesianGrid::InitializeFragment()
         //XZ
         D3D11_BUFFER_DESC XZGridVertexBufferDesc =
         {
-            static_cast<UINT>(this->vecaXZGridVertices.size() * sizeof(CartesianGrid::Vertex)),
+            static_cast<UINT>(this->XZGridVertices.Size() * sizeof(CartesianGrid::Vertex)),
             D3D11_USAGE_IMMUTABLE,
             D3D11_BIND_VERTEX_BUFFER,
             NULL,
@@ -76,7 +79,7 @@ bool CartesianGrid::InitializeFragment()
         };
         D3D11_SUBRESOURCE_DATA XZGridVertexBufferSubRe =
         {
-            &(this->vecaXZGridVertices[0]),
+            &(this->XZGridVertices[0]),
             NULL,
             NULL
         };
@@ -90,7 +93,7 @@ bool CartesianGrid::InitializeFragment()
 
         D3D11_BUFFER_DESC XZGridIndexBufferDesc =
         {
-            static_cast<UINT>(this->vecaXZGridIndices.size() * sizeof(DWORD)),
+            static_cast<UINT>(this->XZGridIndices.Size() * sizeof(DWORD)),
             D3D11_USAGE_IMMUTABLE,
             D3D11_BIND_INDEX_BUFFER,
             NULL,
@@ -99,7 +102,7 @@ bool CartesianGrid::InitializeFragment()
         };
         D3D11_SUBRESOURCE_DATA XZGridIndexBufferSubRe =
         {
-            &(this->vecaXZGridIndices[0]),
+            &(this->XZGridIndices[0]),
             NULL,
             NULL
         };
@@ -115,7 +118,7 @@ bool CartesianGrid::InitializeFragment()
         //XY
         D3D11_BUFFER_DESC XYGridVertexBufferDesc =
         {
-            static_cast<UINT>(this->vecaXYGridVertices.size() * sizeof(CartesianGrid::Vertex)),
+            static_cast<UINT>(this->XYGridVertices.Size() * sizeof(CartesianGrid::Vertex)),
             D3D11_USAGE_IMMUTABLE,
             D3D11_BIND_VERTEX_BUFFER,
             NULL,
@@ -124,7 +127,7 @@ bool CartesianGrid::InitializeFragment()
         };
         D3D11_SUBRESOURCE_DATA XYGridVertexBufferSubRe =
         {
-            &(this->vecaXYGridVertices[0]),
+            &(this->XYGridVertices[0]),
             NULL,
             NULL
         };
@@ -138,7 +141,7 @@ bool CartesianGrid::InitializeFragment()
 
         D3D11_BUFFER_DESC XYGridIndexBufferDesc =
         {
-            static_cast<UINT>(this->vecaXYGridIndices.size() * sizeof(DWORD)),
+            static_cast<UINT>(this->XYGridIndices.Size() * sizeof(DWORD)),
             D3D11_USAGE_IMMUTABLE,
             D3D11_BIND_INDEX_BUFFER,
             NULL,
@@ -147,7 +150,7 @@ bool CartesianGrid::InitializeFragment()
         };
         D3D11_SUBRESOURCE_DATA XYGridIndexBufferSubRe =
         {
-            &(this->vecaXYGridIndices[0]),
+            &(this->XYGridIndices[0]),
             NULL,
             NULL
         };
@@ -163,7 +166,7 @@ bool CartesianGrid::InitializeFragment()
         //ZY
         D3D11_BUFFER_DESC ZYGridVertexBufferDesc =
         {
-            static_cast<UINT>(this->vecaZYGridVertices.size() * sizeof(CartesianGrid::Vertex)),
+            static_cast<UINT>(this->ZYGridVertices.Size() * sizeof(CartesianGrid::Vertex)),
             D3D11_USAGE_IMMUTABLE,
             D3D11_BIND_VERTEX_BUFFER,
             NULL,
@@ -172,7 +175,7 @@ bool CartesianGrid::InitializeFragment()
         };
         D3D11_SUBRESOURCE_DATA ZYGridVertexBufferSubRe =
         {
-            &(this->vecaZYGridVertices[0]),
+            &(this->ZYGridVertices[0]),
             NULL,
             NULL
         };
@@ -186,7 +189,7 @@ bool CartesianGrid::InitializeFragment()
 
         D3D11_BUFFER_DESC ZYGridIndexBufferDesc =
         {
-            static_cast<UINT>(this->vecaZYGridIndices.size() * sizeof(DWORD)),
+            static_cast<UINT>(this->ZYGridIndices.Size() * sizeof(DWORD)),
             D3D11_USAGE_IMMUTABLE,
             D3D11_BIND_INDEX_BUFFER,
             NULL,
@@ -195,7 +198,7 @@ bool CartesianGrid::InitializeFragment()
         };
         D3D11_SUBRESOURCE_DATA ZYGridIndexBufferSubRe =
         {
-            &(this->vecaZYGridIndices[0]),
+            &(this->ZYGridIndices[0]),
             NULL,
             NULL
         };
@@ -341,7 +344,7 @@ bool CartesianGrid::DrawFragment()
 
     this->BindFragmentSpecificRenderOutput();
 
-    D3D11::GetD3D11DeviceContext()->DrawIndexed(static_cast<UINT>(this->vecaXZGridIndices.size()), 0, 0);
+    D3D11::GetD3D11DeviceContext()->DrawIndexed(static_cast<UINT>(this->XZGridIndices.Size()), 0, 0);
 
 
 
@@ -358,7 +361,7 @@ bool CartesianGrid::DrawFragment()
 
     D3D11::GetD3D11DeviceContext()->IASetVertexBuffers(0, 1, this->cpXYGridVertexBuffer.GetAddressOf(), uiStrides, uiOffsets);
     D3D11::GetD3D11DeviceContext()->IASetIndexBuffer(this->cpXYGridIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, NULL);
-    D3D11::GetD3D11DeviceContext()->DrawIndexed(static_cast<UINT>(this->vecaXYGridIndices.size()), 0, 0);
+    D3D11::GetD3D11DeviceContext()->DrawIndexed(static_cast<UINT>(this->XYGridIndices.Size()), 0, 0);
 
 
 
@@ -375,7 +378,7 @@ bool CartesianGrid::DrawFragment()
 
     D3D11::GetD3D11DeviceContext()->IASetVertexBuffers(0, 1, this->cpZYGridVertexBuffer.GetAddressOf(), uiStrides, uiOffsets);
     D3D11::GetD3D11DeviceContext()->IASetIndexBuffer(this->cpZYGridIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, NULL);
-    D3D11::GetD3D11DeviceContext()->DrawIndexed(static_cast<UINT>(this->vecaZYGridIndices.size()), 0, 0);
+    D3D11::GetD3D11DeviceContext()->DrawIndexed(static_cast<UINT>(this->ZYGridIndices.Size()), 0, 0);
 
 
 
@@ -402,7 +405,7 @@ bool CartesianGrid::GraphOptionsUpdated()
     //XZ
     D3D11_BUFFER_DESC XZGridVertexBufferDesc =
     {
-        static_cast<UINT>(this->vecaXZGridVertices.size() * sizeof(CartesianGrid::Vertex)),
+        static_cast<UINT>(this->XZGridVertices.Size() * sizeof(CartesianGrid::Vertex)),
         D3D11_USAGE_IMMUTABLE,
         D3D11_BIND_VERTEX_BUFFER,
         NULL,
@@ -411,7 +414,7 @@ bool CartesianGrid::GraphOptionsUpdated()
     };
     D3D11_SUBRESOURCE_DATA XZGridVertexBufferSubRe =
     {
-        &(this->vecaXZGridVertices[0]),
+        &(this->XZGridVertices[0]),
         NULL,
         NULL
     };
@@ -424,7 +427,7 @@ bool CartesianGrid::GraphOptionsUpdated()
 
     D3D11_BUFFER_DESC XZGridIndexBufferDesc =
     {
-        static_cast<UINT>(this->vecaXZGridIndices.size() * sizeof(DWORD)),
+        static_cast<UINT>(this->XZGridIndices.Size() * sizeof(DWORD)),
         D3D11_USAGE_IMMUTABLE,
         D3D11_BIND_INDEX_BUFFER,
         NULL,
@@ -433,7 +436,7 @@ bool CartesianGrid::GraphOptionsUpdated()
     };
     D3D11_SUBRESOURCE_DATA XZGridIndexBufferSubRe =
     {
-        &(this->vecaXZGridIndices[0]),
+        &(this->XZGridIndices[0]),
         NULL,
         NULL
     };
@@ -448,7 +451,7 @@ bool CartesianGrid::GraphOptionsUpdated()
     //XY
     D3D11_BUFFER_DESC XYGridVertexBufferDesc =
     {
-        static_cast<UINT>(this->vecaXYGridVertices.size() * sizeof(CartesianGrid::Vertex)),
+        static_cast<UINT>(this->XYGridVertices.Size() * sizeof(CartesianGrid::Vertex)),
         D3D11_USAGE_IMMUTABLE,
         D3D11_BIND_VERTEX_BUFFER,
         NULL,
@@ -457,7 +460,7 @@ bool CartesianGrid::GraphOptionsUpdated()
     };
     D3D11_SUBRESOURCE_DATA XYGridVertexBufferSubRe =
     {
-        &(this->vecaXYGridVertices[0]),
+        &(this->XYGridVertices[0]),
         NULL,
         NULL
     };
@@ -470,7 +473,7 @@ bool CartesianGrid::GraphOptionsUpdated()
 
     D3D11_BUFFER_DESC XYGridIndexBufferDesc =
     {
-        static_cast<UINT>(this->vecaXYGridIndices.size() * sizeof(DWORD)),
+        static_cast<UINT>(this->XYGridIndices.Size() * sizeof(DWORD)),
         D3D11_USAGE_IMMUTABLE,
         D3D11_BIND_INDEX_BUFFER,
         NULL,
@@ -479,7 +482,7 @@ bool CartesianGrid::GraphOptionsUpdated()
     };
     D3D11_SUBRESOURCE_DATA XYGridIndexBufferSubRe =
     {
-        &(this->vecaXYGridIndices[0]),
+        &(this->XYGridIndices[0]), 
         NULL,
         NULL
     };
@@ -494,7 +497,7 @@ bool CartesianGrid::GraphOptionsUpdated()
     //ZY
     D3D11_BUFFER_DESC ZYGridVertexBufferDesc =
     {
-        static_cast<UINT>(this->vecaZYGridVertices.size() * sizeof(CartesianGrid::Vertex)),
+        static_cast<UINT>(this->ZYGridVertices.Size() * sizeof(CartesianGrid::Vertex)), 
         D3D11_USAGE_IMMUTABLE,
         D3D11_BIND_VERTEX_BUFFER,
         NULL,
@@ -503,7 +506,7 @@ bool CartesianGrid::GraphOptionsUpdated()
     };
     D3D11_SUBRESOURCE_DATA ZYGridVertexBufferSubRe =
     {
-        &(this->vecaZYGridVertices[0]),
+        &(this->ZYGridVertices[0]),
         NULL,
         NULL
     };
@@ -516,7 +519,7 @@ bool CartesianGrid::GraphOptionsUpdated()
 
     D3D11_BUFFER_DESC ZYGridIndexBufferDesc =
     {
-        static_cast<UINT>(this->vecaZYGridIndices.size() * sizeof(DWORD)),
+        static_cast<UINT>(this->ZYGridIndices.Size() * sizeof(DWORD)),
         D3D11_USAGE_IMMUTABLE,
         D3D11_BIND_INDEX_BUFFER,
         NULL,
@@ -525,7 +528,7 @@ bool CartesianGrid::GraphOptionsUpdated()
     };
     D3D11_SUBRESOURCE_DATA ZYGridIndexBufferSubRe =
     {
-        &(this->vecaZYGridIndices[0]),
+        &(this->ZYGridIndices[0]),
         NULL,
         NULL
     };
@@ -545,6 +548,11 @@ bool CartesianGrid::GraphOptionsUpdated()
     return true;
 }
 
+bool CartesianGrid::GraphFunctionUpdated()
+{
+    return true;
+}
+
 void CartesianGrid::GenerateGrid(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, CartesianGrid::GridType Type)
 {
     assert(uiRangeX != 0 && uiRangeY != 0 && uiRangeZ != 0);
@@ -554,8 +562,8 @@ void CartesianGrid::GenerateGrid(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Ca
     
     case CartesianGrid::GridType::XZ:
     {
-        this->vecaXZGridVertices.clear();
-        this->vecaXZGridIndices.clear();
+        this->XZGridVertices.RemoveAll();
+        this->XZGridIndices.RemoveAll();
 
 
         //Create XZ Plane
@@ -567,7 +575,7 @@ void CartesianGrid::GenerateGrid(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Ca
                 Current.f3Color = DirectX::XMFLOAT3(0.0f, 0.3f, 1.0f);
                 Current.f3LocalPosition = DirectX::XMFLOAT3(static_cast<float>(x), 0.0f, static_cast<float>(z));
 
-                this->vecaXZGridVertices.push_back(Current);
+                this->XZGridVertices.Append(Current);
             }
         }
 
@@ -577,17 +585,17 @@ void CartesianGrid::GenerateGrid(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Ca
         {
             for (int x = -static_cast<int>(uiRangeX); x < static_cast<int>(uiRangeX); x++)
             {
-                this->vecaXZGridIndices.push_back(static_cast<DWORD>(Cur));
-                this->vecaXZGridIndices.push_back(static_cast<DWORD>(Cur + 1));
+                this->XZGridIndices.Append(static_cast<DWORD>(Cur));
+                this->XZGridIndices.Append(static_cast<DWORD>(Cur + 1));
 
-                this->vecaXZGridIndices.push_back(static_cast<DWORD>(Cur + 1));
-                this->vecaXZGridIndices.push_back(static_cast<DWORD>(Cur + uiVerticesPerXRow + 1));
+                this->XZGridIndices.Append(static_cast<DWORD>(Cur + 1));
+                this->XZGridIndices.Append(static_cast<DWORD>(Cur + uiVerticesPerXRow + 1));
 
-                this->vecaXZGridIndices.push_back(static_cast<DWORD>(Cur + uiVerticesPerXRow + 1));
-                this->vecaXZGridIndices.push_back(static_cast<DWORD>(Cur + uiVerticesPerXRow));
+                this->XZGridIndices.Append(static_cast<DWORD>(Cur + uiVerticesPerXRow + 1));
+                this->XZGridIndices.Append(static_cast<DWORD>(Cur + uiVerticesPerXRow));
 
-                this->vecaXZGridIndices.push_back(static_cast<DWORD>(Cur + uiVerticesPerXRow));
-                this->vecaXZGridIndices.push_back(static_cast<DWORD>(Cur));
+                this->XZGridIndices.Append(static_cast<DWORD>(Cur + uiVerticesPerXRow));
+                this->XZGridIndices.Append(static_cast<DWORD>(Cur));
 
                 Cur++;
             }
@@ -598,8 +606,8 @@ void CartesianGrid::GenerateGrid(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Ca
 
     case CartesianGrid::GridType::XY:
     {
-        this->vecaXYGridVertices.clear();
-        this->vecaXYGridIndices.clear();
+        this->XYGridVertices.RemoveAll(); 
+        this->XYGridIndices.RemoveAll();
 
 
         //Create XZ Plane
@@ -611,7 +619,7 @@ void CartesianGrid::GenerateGrid(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Ca
                 Current.f3Color = DirectX::XMFLOAT3(0.0f, 0.3f, 1.0f);
                 Current.f3LocalPosition = DirectX::XMFLOAT3(static_cast<float>(x), static_cast<float>(y), 0.0f);
 
-                this->vecaXYGridVertices.push_back(Current);
+                this->XYGridVertices.Append(Current); 
             }
         }
 
@@ -621,17 +629,17 @@ void CartesianGrid::GenerateGrid(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Ca
         {
             for (int x = -static_cast<int>(uiRangeX); x < static_cast<int>(uiRangeX); x++)
             {
-                this->vecaXYGridIndices.push_back(static_cast<DWORD>(Cur));
-                this->vecaXYGridIndices.push_back(static_cast<DWORD>(Cur + 1));
+                this->XYGridIndices.Append(static_cast<DWORD>(Cur));
+                this->XYGridIndices.Append(static_cast<DWORD>(Cur + 1)); 
 
-                this->vecaXYGridIndices.push_back(static_cast<DWORD>(Cur + 1));
-                this->vecaXYGridIndices.push_back(static_cast<DWORD>(Cur + uiVerticesPerXRow + 1));
+                this->XYGridIndices.Append(static_cast<DWORD>(Cur + 1)); 
+                this->XYGridIndices.Append(static_cast<DWORD>(Cur + uiVerticesPerXRow + 1));
 
-                this->vecaXYGridIndices.push_back(static_cast<DWORD>(Cur + uiVerticesPerXRow + 1));
-                this->vecaXYGridIndices.push_back(static_cast<DWORD>(Cur + uiVerticesPerXRow));
+                this->XYGridIndices.Append(static_cast<DWORD>(Cur + uiVerticesPerXRow + 1)); 
+                this->XYGridIndices.Append(static_cast<DWORD>(Cur + uiVerticesPerXRow));
 
-                this->vecaXYGridIndices.push_back(static_cast<DWORD>(Cur + uiVerticesPerXRow));
-                this->vecaXYGridIndices.push_back(static_cast<DWORD>(Cur));
+                this->XYGridIndices.Append(static_cast<DWORD>(Cur + uiVerticesPerXRow)); 
+                this->XYGridIndices.Append(static_cast<DWORD>(Cur));
 
                 Cur++;
             }
@@ -642,8 +650,8 @@ void CartesianGrid::GenerateGrid(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Ca
 
     case CartesianGrid::GridType::ZY:
     {
-        this->vecaZYGridVertices.clear();
-        this->vecaZYGridIndices.clear(); 
+        this->ZYGridVertices.RemoveAll();
+        this->ZYGridIndices.RemoveAll();  
 
 
         //Create XZ Plane
@@ -651,11 +659,11 @@ void CartesianGrid::GenerateGrid(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Ca
         {
             for (int z = -static_cast<int>(uiRangeZ); z <= static_cast<int>(uiRangeZ); z++)
             {
-                CartesianGrid::Vertex Current;
-                Current.f3Color = DirectX::XMFLOAT3(0.0f, 0.3f, 1.0f);
+                CartesianGrid::Vertex Current; 
+                Current.f3Color         = DirectX::XMFLOAT3(0.0f, 0.3f, 1.0f);
                 Current.f3LocalPosition = DirectX::XMFLOAT3(0.0f, static_cast<float>(y), static_cast<float>(z));
 
-                this->vecaZYGridVertices.push_back(Current);
+                this->ZYGridVertices.Append(Current); 
             }
         }
 
@@ -665,17 +673,17 @@ void CartesianGrid::GenerateGrid(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Ca
         {
             for (int z = -static_cast<int>(uiRangeZ); z < static_cast<int>(uiRangeZ); z++)
             {
-                this->vecaZYGridIndices.push_back(static_cast<DWORD>(Cur));
-                this->vecaZYGridIndices.push_back(static_cast<DWORD>(Cur + 1));
+                this->ZYGridIndices.Append(static_cast<DWORD>(Cur)); 
+                this->ZYGridIndices.Append(static_cast<DWORD>(Cur + 1)); 
 
-                this->vecaZYGridIndices.push_back(static_cast<DWORD>(Cur + 1));
-                this->vecaZYGridIndices.push_back(static_cast<DWORD>(Cur + uiVerticesPerZRow + 1));
+                this->ZYGridIndices.Append(static_cast<DWORD>(Cur + 1));
+                this->ZYGridIndices.Append(static_cast<DWORD>(Cur + uiVerticesPerZRow + 1)); 
 
-                this->vecaZYGridIndices.push_back(static_cast<DWORD>(Cur + uiVerticesPerZRow + 1));
-                this->vecaZYGridIndices.push_back(static_cast<DWORD>(Cur + uiVerticesPerZRow));
+                this->ZYGridIndices.Append(static_cast<DWORD>(Cur + uiVerticesPerZRow + 1)); 
+                this->ZYGridIndices.Append(static_cast<DWORD>(Cur + uiVerticesPerZRow)); 
 
-                this->vecaZYGridIndices.push_back(static_cast<DWORD>(Cur + uiVerticesPerZRow));
-                this->vecaZYGridIndices.push_back(static_cast<DWORD>(Cur));
+                this->ZYGridIndices.Append(static_cast<DWORD>(Cur + uiVerticesPerZRow));
+                this->ZYGridIndices.Append(static_cast<DWORD>(Cur)); 
 
                 Cur++;
             }

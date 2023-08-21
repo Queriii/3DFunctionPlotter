@@ -231,10 +231,6 @@ void Parser::InfixToPostfix(PCTSTR pctszInfix, List<PTSTR>& PostfixTokens)
     }
 }
 
-
-
-
-//Private
 bool Parser::IsNumber(TCHAR c)
 {
     return (c >= __TEXT('0') && c <= __TEXT('9'));
@@ -342,10 +338,14 @@ bool Parser::IsVariable(PTSTR c)
             return true;
         }
     }
-
-    return false;
+     
+    return false; 
 }
 
+
+
+
+//Private
 Parser::OperatorInformation Parser::GetOperatorInformation(TCHAR c)
 {
     for (UINT i = 0; i < _countof(Parser::ValidOperators); i++)

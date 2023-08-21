@@ -52,6 +52,12 @@
     <Filter Include="Src\Exceptions">
       <UniqueIdentifier>{4af9738d-e457-4e82-8049-ed2801718499}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Hdr\D3D11\Fragments\Function">
+      <UniqueIdentifier>{966789be-ff29-4c2d-ac67-14b066a5f8d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\D3D11\Fragments\Function">
+      <UniqueIdentifier>{8afa4443-da8a-434b-a2ed-20ba18336036}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Win32\Window.cpp">
@@ -86,6 +92,9 @@
     </ClCompile>
     <ClCompile Include="Src\Exceptions\Exceptions.cpp">
       <Filter>Src\Exceptions</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\D3D11\Fragments\TwoVarFunction.cpp">
+      <Filter>Src\D3D11\Fragments\Function</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -128,6 +137,12 @@
     <ClInclude Include="Hdr\Exceptions\Exceptions.hpp">
       <Filter>Hdr\Exceptions</Filter>
     </ClInclude>
+    <ClInclude Include="Hdr\Win32\UpdateTypes.hpp">
+      <Filter>Hdr\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Hdr\D3D11\Fragments\TwoVarFunction.hpp">
+      <Filter>Hdr\D3D11\Fragments\Function</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resources\FunctionVisualizer.rc">
@@ -146,6 +161,12 @@
     </FxCompile>
     <FxCompile Include="Src\D3D11\Fragments\CartesianGridPS.hlsl">
       <Filter>Src\D3D11\Fragments\CartesianGrid</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\D3D11\Fragments\TwoVarFunctionVS.hlsl">
+      <Filter>Src\D3D11\Fragments\Function</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\D3D11\Fragments\TwoVarFunctionPS.hlsl">
+      <Filter>Src\D3D11\Fragments\Function</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

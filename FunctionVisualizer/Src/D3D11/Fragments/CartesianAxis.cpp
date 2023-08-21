@@ -230,3 +230,8 @@ bool CartesianAxis::GraphOptionsUpdated()
 
     return true;
 }
+
+bool CartesianAxis::GraphFunctionUpdated()
+{
+    return true;
+}

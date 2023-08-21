@@ -17,6 +17,7 @@ public:
     bool InitializeFragment() override;
     bool DrawFragment() override;
     bool GraphOptionsUpdated() override;
+    bool GraphFunctionUpdated() override;
 
 private:
     typedef struct Vertex

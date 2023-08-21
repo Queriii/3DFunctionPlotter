@@ -2,6 +2,7 @@
 
 #include "D3D11Fragment.hpp"
 #include "../Data Structures/List.hpp"
+#include "../Win32/UpdateTypes.hpp"
 
 #include <d3d11.h>
 #include <wrl/client.h>
@@ -16,7 +17,7 @@ public:
 
     static bool RegisterFragment(D3D11Fragment* pFragment);
 
-    static bool UpdateFragments();
+    static bool UpdateFragments(UpdateTypes Type);
 
     static bool ProcessKeyboard();
     static bool RenderFrame();

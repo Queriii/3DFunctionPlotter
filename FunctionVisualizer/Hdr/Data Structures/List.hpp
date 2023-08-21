@@ -93,7 +93,6 @@ bool List<Data>::RemoveLast()
         return false;
     }
 
-    this->pArray[this->uiNumElements - 1] = NULL;
     this->uiNumElements--;
 
     return true;

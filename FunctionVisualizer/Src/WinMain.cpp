@@ -10,6 +10,7 @@
 #include "../Hdr/D3D11/D3D11.hpp"
 #include "../Hdr/D3D11/Fragments/CartesianAxis.hpp"
 #include "../Hdr/D3D11/Fragments/CartesianGrid.hpp"
+#include "../Hdr/D3D11/Fragments/TwoVarFunction.hpp"
 #include "../Hdr/D3D11/D3D11Camera.hpp"
 #include "../Hdr/Exceptions/Exceptions.hpp"
 
@@ -60,6 +61,18 @@ int WINAPI WIN_MAIN(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrev, _In_ PTS
 
             throw Exception_D3D11FragmentRegistration();
         }
+
+        D3D11Fragment* pTwoVarFunction = new TwoVarFunction;
+        if (!pTwoVarFunction || !D3D11::RegisterFragment(pTwoVarFunction))
+        {
+            if (!pTwoVarFunction)
+            {
+                AdditionalExceptionInformation::SetLastErrorCode(AdditionalExceptionInformation::AdditionalExceptionInformationIndices::_New);
+                AdditionalExceptionInformation::SetErrorLocation(__FILE__, __LINE__);
+            }
+
+            throw Exception_D3D11FragmentRegistration();
+        }
     }
     catch (GenericException& Exception)
     {
@@ -71,5 +84,7 @@ int WINAPI WIN_MAIN(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrev, _In_ PTS
     int Ret = static_cast<int>(Window::WindowLoop());
 
     D3D11::Cleanup();
-    return Ret;
+    Window::Cleanup();
+
+    return 0;
 }

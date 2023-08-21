@@ -21,6 +21,7 @@ public:
     virtual bool InitializeFragment()   = 0;        //Is called upon when fragment is registered in d3d11, otherwise don't call (post construction)...
     virtual bool DrawFragment()         = 0;
     virtual bool GraphOptionsUpdated()  = 0;
+    virtual bool GraphFunctionUpdated() = 0;
 
 protected:
     void SetRenderSpecificOutput(ID3D11RenderTargetView* pRTV, ID3D11DepthStencilView* pDSV);

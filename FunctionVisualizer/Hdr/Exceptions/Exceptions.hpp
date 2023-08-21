@@ -109,6 +109,11 @@ public:
         _GetRawInputData,
         _Map,
         _CheckRadioButtons,
+        _CreateHullShader,
+        _CreateDomainShader,
+        _CreateSamplerState,
+        _CreateShaderResourceView,
+        _CreateRasterizerState,
     };
     static constexpr const char* AdditionalExceptionInformationTable[] = 
     {
@@ -135,6 +140,11 @@ public:
         ("Failed to retrieve raw input data from the mouse."),
         ("Failed to map gpu to cpu memory."),
         ("Failed to update a selection of radio buttons."),
+        ("Failed to create hull shader."),
+        ("Failed to create domain shader."),
+        ("Failed to create sampler state."),
+        ("Failed to create a shader resource view."),
+        ("Failed to create rasterizer state."),
     };
 
     static AdditionalExceptionInformation::AdditionalExceptionInformationIndices    GetLastErrorCode();
