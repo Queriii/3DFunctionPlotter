@@ -19,6 +19,7 @@ public:
     bool DrawFragment() override;
     bool GraphOptionsUpdated() override;
     bool GraphFunctionUpdated() override;
+    bool GraphStyleUpdated() override;
 
     enum GridType
     {

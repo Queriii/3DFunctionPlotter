@@ -14,14 +14,15 @@
 CartesianAxis::CartesianAxis()
     : D3D11Fragment(D3D11::GetD3D11DeviceContext()), cpInputLayout(nullptr), cpVertexBuffer(nullptr), VertexInterpretation(D3D11_PRIMITIVE_TOPOLOGY_LINELIST), cpVertexShader(nullptr), cpVSTransformationConstantBuffer(nullptr), ClientViewport({}), cpPixelShader(nullptr)
 {
-    GraphOptions GraphOptionsConfig = Window::GetGraphOptionsConfig();
+    GraphOptions    GraphOptionsConfig  = Window::GetGraphOptionsConfig();
+    GraphStyle      GraphStyleConfig    = Window::GetGraphStyleConfig();
 
-    this->Vertices[0] = { DirectX::XMFLOAT3(-static_cast<float>(GraphOptionsConfig.uiRangeXAxis), 0.0f, 0.0f), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f) };
-    this->Vertices[1] = { DirectX::XMFLOAT3(static_cast<float>(GraphOptionsConfig.uiRangeXAxis), 0.0f, 0.0f), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f) };
-    this->Vertices[2] = { DirectX::XMFLOAT3(0.0f, -static_cast<float>(GraphOptionsConfig.uiRangeYAxis), 0.0f), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f) };
-    this->Vertices[3] = { DirectX::XMFLOAT3(0.0f, static_cast<float>(GraphOptionsConfig.uiRangeYAxis), 0.0f), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f) };
-    this->Vertices[4] = { DirectX::XMFLOAT3(0.0f, 0.0f, -static_cast<float>(GraphOptionsConfig.uiRangeZAxis)), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f) };
-    this->Vertices[5] = { DirectX::XMFLOAT3(0.0f, 0.0f, static_cast<float>(GraphOptionsConfig.uiRangeZAxis)), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f) };
+    this->Vertices[0] = { DirectX::XMFLOAT3(-static_cast<float>(GraphOptionsConfig.uiRangeXAxis), 0.0f, 0.0f), GraphStyleConfig.f3CartesianAxisColor };
+    this->Vertices[1] = { DirectX::XMFLOAT3(static_cast<float>(GraphOptionsConfig.uiRangeXAxis), 0.0f, 0.0f), GraphStyleConfig.f3CartesianAxisColor };
+    this->Vertices[2] = { DirectX::XMFLOAT3(0.0f, -static_cast<float>(GraphOptionsConfig.uiRangeYAxis), 0.0f), GraphStyleConfig.f3CartesianAxisColor };
+    this->Vertices[3] = { DirectX::XMFLOAT3(0.0f, static_cast<float>(GraphOptionsConfig.uiRangeYAxis), 0.0f), GraphStyleConfig.f3CartesianAxisColor };
+    this->Vertices[4] = { DirectX::XMFLOAT3(0.0f, 0.0f, -static_cast<float>(GraphOptionsConfig.uiRangeZAxis)), GraphStyleConfig.f3CartesianAxisColor };
+    this->Vertices[5] = { DirectX::XMFLOAT3(0.0f, 0.0f, static_cast<float>(GraphOptionsConfig.uiRangeZAxis)), GraphStyleConfig.f3CartesianAxisColor };
 
     this->SetDrawAllowance(GraphOptionsConfig.bShowCartesianAxis);
 }
@@ -201,14 +202,15 @@ bool CartesianAxis::DrawFragment()
 
 bool CartesianAxis::GraphOptionsUpdated() 
 {
-    GraphOptions GraphOptionsConfig = Window::GetGraphOptionsConfig();
+    GraphOptions    GraphOptionsConfig  = Window::GetGraphOptionsConfig();
+    GraphStyle      GraphStyleConfig    = Window::GetGraphStyleConfig();
 
-    this->Vertices[0] = { DirectX::XMFLOAT3(-static_cast<float>(GraphOptionsConfig.uiRangeXAxis), 0.0f, 0.0f), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f) };
-    this->Vertices[1] = { DirectX::XMFLOAT3(static_cast<float>(GraphOptionsConfig.uiRangeXAxis), 0.0f, 0.0f), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f) };
-    this->Vertices[2] = { DirectX::XMFLOAT3(0.0f, -static_cast<float>(GraphOptionsConfig.uiRangeYAxis), 0.0f), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f) };
-    this->Vertices[3] = { DirectX::XMFLOAT3(0.0f, static_cast<float>(GraphOptionsConfig.uiRangeYAxis), 0.0f), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f) };
-    this->Vertices[4] = { DirectX::XMFLOAT3(0.0f, 0.0f, -static_cast<float>(GraphOptionsConfig.uiRangeZAxis)), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f) };
-    this->Vertices[5] = { DirectX::XMFLOAT3(0.0f, 0.0f, static_cast<float>(GraphOptionsConfig.uiRangeZAxis)), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f) };
+    this->Vertices[0] = { DirectX::XMFLOAT3(-static_cast<float>(GraphOptionsConfig.uiRangeXAxis), 0.0f, 0.0f), GraphStyleConfig.f3CartesianAxisColor };
+    this->Vertices[1] = { DirectX::XMFLOAT3(static_cast<float>(GraphOptionsConfig.uiRangeXAxis), 0.0f, 0.0f), GraphStyleConfig.f3CartesianAxisColor };
+    this->Vertices[2] = { DirectX::XMFLOAT3(0.0f, -static_cast<float>(GraphOptionsConfig.uiRangeYAxis), 0.0f), GraphStyleConfig.f3CartesianAxisColor };
+    this->Vertices[3] = { DirectX::XMFLOAT3(0.0f, static_cast<float>(GraphOptionsConfig.uiRangeYAxis), 0.0f), GraphStyleConfig.f3CartesianAxisColor };
+    this->Vertices[4] = { DirectX::XMFLOAT3(0.0f, 0.0f, -static_cast<float>(GraphOptionsConfig.uiRangeZAxis)), GraphStyleConfig.f3CartesianAxisColor };
+    this->Vertices[5] = { DirectX::XMFLOAT3(0.0f, 0.0f, static_cast<float>(GraphOptionsConfig.uiRangeZAxis)), GraphStyleConfig.f3CartesianAxisColor };
 
 
 
@@ -233,5 +235,30 @@ bool CartesianAxis::GraphOptionsUpdated()
 
 bool CartesianAxis::GraphFunctionUpdated()
 {
+    return true;
+}
+
+bool CartesianAxis::GraphStyleUpdated()
+{
+    GraphOptions    GraphOptionsConfig = Window::GetGraphOptionsConfig();
+    GraphStyle      GraphStyleConfig = Window::GetGraphStyleConfig();
+
+    this->Vertices[0] = { DirectX::XMFLOAT3(-static_cast<float>(GraphOptionsConfig.uiRangeXAxis), 0.0f, 0.0f), GraphStyleConfig.f3CartesianAxisColor };
+    this->Vertices[1] = { DirectX::XMFLOAT3(static_cast<float>(GraphOptionsConfig.uiRangeXAxis), 0.0f, 0.0f), GraphStyleConfig.f3CartesianAxisColor };
+    this->Vertices[2] = { DirectX::XMFLOAT3(0.0f, -static_cast<float>(GraphOptionsConfig.uiRangeYAxis), 0.0f), GraphStyleConfig.f3CartesianAxisColor };
+    this->Vertices[3] = { DirectX::XMFLOAT3(0.0f, static_cast<float>(GraphOptionsConfig.uiRangeYAxis), 0.0f), GraphStyleConfig.f3CartesianAxisColor };
+    this->Vertices[4] = { DirectX::XMFLOAT3(0.0f, 0.0f, -static_cast<float>(GraphOptionsConfig.uiRangeZAxis)), GraphStyleConfig.f3CartesianAxisColor };
+    this->Vertices[5] = { DirectX::XMFLOAT3(0.0f, 0.0f, static_cast<float>(GraphOptionsConfig.uiRangeZAxis)), GraphStyleConfig.f3CartesianAxisColor };
+
+    D3D11_MAPPED_SUBRESOURCE MappedVertexBuffer; 
+    if (FAILED(D3D11::GetD3D11DeviceContext()->Map(this->cpVertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, NULL, &MappedVertexBuffer))) 
+    {
+        AdditionalExceptionInformation::SetLastErrorCode(AdditionalExceptionInformation::AdditionalExceptionInformationIndices::_Map);
+        AdditionalExceptionInformation::SetErrorLocation(__FILE__, __LINE__);
+        return false;
+    }
+    memcpy_s(MappedVertexBuffer.pData, _countof(this->Vertices) * sizeof(CartesianAxis::Vertex), this->Vertices, _countof(this->Vertices) * sizeof(CartesianAxis::Vertex));
+    D3D11::GetD3D11DeviceContext()->Unmap(this->cpVertexBuffer.Get(), 0);
+
     return true;
 }

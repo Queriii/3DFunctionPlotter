@@ -34,9 +34,8 @@ double Window::dTimeToRenderPreviousFrame = 0.0;
 
 GraphFunction Window::GraphFunctionConfig =
 {
-    true,
     false,
-    new TCHAR[_tcslen(__TEXT("x+z"))]{__TEXT('x'), __TEXT('+'), __TEXT('z'), __TEXT('\0')},
+    new TCHAR[_tcslen(__TEXT("x+z")) + 1]{__TEXT('x'), __TEXT('+'), __TEXT('z'), __TEXT('\0')},
     1
 };
 GraphOptions Window::GraphOptionsConfig =
@@ -48,7 +47,16 @@ GraphOptions Window::GraphOptionsConfig =
     true,
     false
 };
+GraphStyle Window::GraphStyleConfig =
+{
+    DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f),
+    DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f),
+    DirectX::XMFLOAT3(0.0f, 0.6f, 0.2f),
+    DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),
 
+    true,
+    false
+};
 
 
 
@@ -192,6 +200,11 @@ GraphOptions Window::GetGraphOptionsConfig()
     return Window::GraphOptionsConfig;
 }
 
+GraphStyle Window::GetGraphStyleConfig()
+{
+    return Window::GraphStyleConfig;
+}
+
 GraphFunction* Window::GetGraphFunctionConfigPtr()
 {
     return &(Window::GraphFunctionConfig);
@@ -202,12 +215,15 @@ GraphOptions* Window::GetGraphOptionsConfigPtr()
     return &(Window::GraphOptionsConfig);
 }
 
+GraphStyle* Window::GetGraphStyleConfigPtr()
+{
+    return &(Window::GraphStyleConfig);
+}
+
 void Window::Cleanup()
 {
-    if (!Window::GraphFunctionConfig.bFirstInitialization)
-    {
-        delete[] Window::GraphFunctionConfig.ptszInfixFunction;
-    }
+    assert(Window::GraphFunctionConfig.ptszInfixFunction != nullptr);
+    delete[] Window::GraphFunctionConfig.ptszInfixFunction;
 }
 
 
@@ -416,6 +432,26 @@ LRESULT _stdcall Window::Win32MessageHandler(HWND hwndWindow, UINT uiMessage, WP
                 break;
             }
 
+            case IDM_GRAPH_STYLES: 
+            {
+                try
+                {
+                    if (static_cast<bool>(DialogBoxParam(reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hwndWindow, GWLP_HINSTANCE)), MAKEINTRESOURCE(IDD_GRAPH_STYLE), hwndWindow, Window::GraphStyleDlgMessageHandler, reinterpret_cast<LPARAM>(& (Window::GraphStyleConfig)))))
+                    {
+                        if (!Window::pUpdateFragments(UpdateTypes::GraphStyleUpdate))
+                        {
+                            throw Exception_D3D11FragmentUpdate();
+                        }
+                    }
+                }
+                catch(GenericException& Exception)
+                {
+                    UNREFERENCED_PARAMETER(Exception); 
+                    WndProcException = std::current_exception();
+                }
+            }
+
+
             default:
             {
                 return (DefWindowProc(hwndWindow, uiMessage, wParam, lParam));
@@ -498,14 +534,8 @@ INT_PTR _stdcall Window::GraphFunctionDlgMessageHandler(HWND hwndDlg, UINT uiMes
                     GetWindowText(GetDlgItem(hwndDlg, IDC_EDIT_INPUTFUNCTION), ptszFunction, iEditFunctionLength + 1);
 
                     assert(pGraphFunctionConfig->ptszInfixFunction != nullptr);
-                    if (!pGraphFunctionConfig->bFirstInitialization)
-                    {
-                        delete[] pGraphFunctionConfig->ptszInfixFunction;
-                    }
-                    else
-                    {
-                        pGraphFunctionConfig->bFirstInitialization = false;
-                    }
+                    delete[] pGraphFunctionConfig->ptszInfixFunction;
+
                     pGraphFunctionConfig->ptszInfixFunction = ptszFunction;
                     pGraphFunctionConfig->bShowFunction     = (SendMessage(GetDlgItem(hwndDlg, IDC_CHECK_DISPLAYFUNCTION), BM_GETCHECK, NULL, NULL) == BST_CHECKED) ? true : false;
 
@@ -799,6 +829,213 @@ INT_PTR _stdcall Window::GraphOptionsDlgMessageHandler(HWND hwndDlg, UINT uiMess
         }
     }
 
+
+    default:
+    {
+        return FALSE;
+    }
+
+    }
+}
+
+INT_PTR Window::GraphStyleDlgMessageHandler(HWND hwndDlg, UINT uiMessage, WPARAM wParam, LPARAM lParam)
+{
+    static GraphStyle*          pGraphStyleConfig;
+    static HBRUSH               hbrCartesianAxisColor, hbrCartesianGridColor, hbrGraphedFunctionColor, hbrWorldBackgroundColor;
+    static DirectX::XMFLOAT3    f3CartesianAxisColor, f3CartesianGridColor, f3GraphedFunctionColor, f3WorldBackgroundColor;
+
+    switch (uiMessage)
+    {
+
+    case WM_INITDIALOG:
+    {
+        pGraphStyleConfig = reinterpret_cast<GraphStyle*>(lParam);
+        assert(pGraphStyleConfig != nullptr);
+
+        f3CartesianAxisColor    = pGraphStyleConfig->f3CartesianAxisColor;
+        f3CartesianGridColor    = pGraphStyleConfig->f3CartesianGridColor;
+        f3GraphedFunctionColor  = pGraphStyleConfig->f3GraphedFunctionColor;
+        f3WorldBackgroundColor  = pGraphStyleConfig->f3WorldBackgroundColor;
+
+        SendMessage(GetDlgItem(hwndDlg, IDC_CHECK_WIREFRAMEFUNCTION), BM_SETCHECK, (pGraphStyleConfig->bWireframeFunction) ? BST_CHECKED : BST_UNCHECKED, NULL);
+        SendMessage(GetDlgItem(hwndDlg, IDC_CHECK_TRANSPARENTFUNCTION), BM_SETCHECK, (pGraphStyleConfig->bTransparentFunction) ? BST_CHECKED : BST_UNCHECKED, NULL);
+
+        return TRUE;
+    }
+
+    case WM_COMMAND: 
+    {
+        switch (LOWORD(wParam))
+        {
+
+        case IDC_STATIC_CARTESIANAXIS_COLOR:
+        case IDC_STATIC_CARTESIANGRID_COLOR:
+        case IDC_STATIC_GRAPHEDFUNCTION_COLOR:
+        case IDC_STATIC_WORLDBACKGROUND_COLOR:
+        {
+            if (HIWORD(wParam) == BN_CLICKED)
+            {
+                COLORREF Col = {};
+                switch (LOWORD(wParam))
+                {
+
+                case IDC_STATIC_CARTESIANAXIS_COLOR:
+                {
+                    Col = RGB(f3CartesianAxisColor.x * 255, f3CartesianAxisColor.y * 255, f3CartesianAxisColor.z * 255);
+                    break;
+                }
+
+                case IDC_STATIC_CARTESIANGRID_COLOR:
+                {
+                    Col = RGB(f3CartesianGridColor.x * 255, f3CartesianGridColor.y * 255, f3CartesianGridColor.z * 255);
+                    break;
+                }
+
+                case IDC_STATIC_GRAPHEDFUNCTION_COLOR:
+                {
+                    Col = RGB(f3GraphedFunctionColor.x * 255, f3GraphedFunctionColor.y * 255, f3GraphedFunctionColor.z * 255);
+                    break;
+                }
+
+                case IDC_STATIC_WORLDBACKGROUND_COLOR:
+                {
+                    Col = RGB(f3WorldBackgroundColor.x * 255, f3WorldBackgroundColor.y * 255, f3WorldBackgroundColor.z * 255);
+                    break;
+                }
+
+                }
+
+                static COLORREF CustomColors[16];
+                CHOOSECOLOR ChooseColorInfo =
+                {
+                    sizeof(CHOOSECOLOR),
+                    hwndDlg,
+                    reinterpret_cast<HWND>(GetWindowLongPtr(GetParent(hwndDlg), GWLP_HINSTANCE)),
+                    Col,
+                    CustomColors,
+                    CC_ANYCOLOR | CC_RGBINIT,
+                    NULL,
+                    nullptr,
+                    nullptr,
+                };
+                if (ChooseColor(&ChooseColorInfo))
+                {
+                    switch (LOWORD(wParam))
+                    {
+
+                    case IDC_STATIC_CARTESIANAXIS_COLOR:
+                    {
+                        f3CartesianAxisColor = DirectX::XMFLOAT3(static_cast<float>(GetRValue(ChooseColorInfo.rgbResult)) / 255.0f, static_cast<float>(GetGValue(ChooseColorInfo.rgbResult)) / 255.0f, static_cast<float>(GetBValue(ChooseColorInfo.rgbResult)) / 255.0f);
+                        break;
+                    }
+
+                    case IDC_STATIC_CARTESIANGRID_COLOR:
+                    {
+                        f3CartesianGridColor = DirectX::XMFLOAT3(static_cast<float>(GetRValue(ChooseColorInfo.rgbResult)) / 255.0f, static_cast<float>(GetGValue(ChooseColorInfo.rgbResult)) / 255.0f, static_cast<float>(GetBValue(ChooseColorInfo.rgbResult)) / 255.0f);
+                        break;
+                    }
+
+                    case IDC_STATIC_GRAPHEDFUNCTION_COLOR:
+                    {
+                        f3GraphedFunctionColor = DirectX::XMFLOAT3(static_cast<float>(GetRValue(ChooseColorInfo.rgbResult)) / 255.0f, static_cast<float>(GetGValue(ChooseColorInfo.rgbResult)) / 255.0f, static_cast<float>(GetBValue(ChooseColorInfo.rgbResult)) / 255.0f);
+                        break;
+                    }
+
+                    case IDC_STATIC_WORLDBACKGROUND_COLOR:
+                    {
+                        f3WorldBackgroundColor = DirectX::XMFLOAT3(static_cast<float>(GetRValue(ChooseColorInfo.rgbResult)) / 255.0f, static_cast<float>(GetGValue(ChooseColorInfo.rgbResult)) / 255.0f, static_cast<float>(GetBValue(ChooseColorInfo.rgbResult)) / 255.0f);
+                        break;
+                    }
+
+                    }
+
+                    InvalidateRect(hwndDlg, NULL, TRUE);
+                }
+            }
+            
+
+            break;
+        }
+
+        case IDC_GS_BUTTON_CANCEL: 
+        case IDC_GS_BUTTON_SAVE:
+        {
+            if (HIWORD(wParam) == BN_CLICKED)
+            {
+                if (LOWORD(wParam) == IDC_GS_BUTTON_SAVE)
+                {
+                    pGraphStyleConfig->f3CartesianAxisColor     = f3CartesianAxisColor;
+                    pGraphStyleConfig->f3CartesianGridColor     = f3CartesianGridColor;
+                    pGraphStyleConfig->f3GraphedFunctionColor   = f3GraphedFunctionColor;
+                    pGraphStyleConfig->f3WorldBackgroundColor   = f3WorldBackgroundColor;
+
+                    pGraphStyleConfig->bWireframeFunction   = static_cast<bool>(SendMessage(GetDlgItem(hwndDlg, IDC_CHECK_WIREFRAMEFUNCTION), BM_GETCHECK, NULL, NULL));
+                    pGraphStyleConfig->bTransparentFunction = static_cast<bool>(SendMessage(GetDlgItem(hwndDlg, IDC_CHECK_TRANSPARENTFUNCTION), BM_GETCHECK, NULL, NULL));
+                }
+
+                EndDialog(hwndDlg, (LOWORD(wParam) == IDC_GS_BUTTON_SAVE) ? 1 : 0);
+            }
+
+            break;
+        }
+
+        }
+
+        return TRUE;
+    }
+     
+    case WM_CTLCOLORSTATIC:
+    {
+        COLORREF Col; 
+        if (lParam == reinterpret_cast<WPARAM>(GetDlgItem(hwndDlg, IDC_STATIC_CARTESIANAXIS_COLOR))) 
+        {
+            Col = (RGB(f3CartesianAxisColor.x * 255, f3CartesianAxisColor.y * 255, f3CartesianAxisColor.z * 255));  
+            if (hbrCartesianAxisColor)
+            {
+                DeleteObject(hbrCartesianAxisColor); 
+            }
+
+            hbrCartesianAxisColor = CreateSolidBrush(Col);
+            return reinterpret_cast<INT_PTR>(hbrCartesianAxisColor);
+        }
+        else if (lParam == reinterpret_cast<WPARAM>(GetDlgItem(hwndDlg, IDC_STATIC_CARTESIANGRID_COLOR))) 
+        {
+            Col = (RGB(f3CartesianGridColor.x * 255, f3CartesianGridColor.y * 255, f3CartesianGridColor.z * 255)); 
+            if (hbrCartesianGridColor)
+            {
+                DeleteObject(hbrCartesianGridColor);
+            }
+
+            hbrCartesianGridColor = CreateSolidBrush(Col);
+            return reinterpret_cast<INT_PTR>(hbrCartesianGridColor);
+        }
+        else if (lParam == reinterpret_cast<WPARAM>(GetDlgItem(hwndDlg, IDC_STATIC_GRAPHEDFUNCTION_COLOR))) 
+        {
+            Col = (RGB(f3GraphedFunctionColor.x * 255, f3GraphedFunctionColor.y * 255, f3GraphedFunctionColor.z * 255)); 
+            if (hbrGraphedFunctionColor)
+            {
+                DeleteObject(hbrGraphedFunctionColor);
+            }
+
+            hbrGraphedFunctionColor = CreateSolidBrush(Col);
+            return reinterpret_cast<INT_PTR>(hbrGraphedFunctionColor);
+        }
+        else if (lParam == reinterpret_cast<WPARAM>(GetDlgItem(hwndDlg, IDC_STATIC_WORLDBACKGROUND_COLOR)))
+        {
+            Col = (RGB(f3WorldBackgroundColor.x * 255, f3WorldBackgroundColor.y * 255, f3WorldBackgroundColor.z * 255)); 
+            if (hbrWorldBackgroundColor)
+            {
+                DeleteObject(hbrWorldBackgroundColor);
+            }
+
+            hbrWorldBackgroundColor = CreateSolidBrush(Col);
+            return (reinterpret_cast<INT_PTR>(hbrWorldBackgroundColor));
+        }
+        else
+        {
+            return FALSE;
+        }
+    }
 
     default:
     {

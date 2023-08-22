@@ -6,14 +6,14 @@
 struct VS_IN
 {
     float3 f3LocalPosition          : LocalPosition;
-    float3 f3Color                  : Color;
+    float4 f4Color                  : Color;
 };
 
 struct VS_OUT
 {
     float4 f4HomoPosition           : SV_Position;
     float3 f3WorldPosition          : WorldPosition;
-    float3 f3Color                  : Color;
+    float4 f4Color                  : Color;
 };
 
 
@@ -34,7 +34,7 @@ VS_OUT main(VS_IN Input)
 
     Output.f4HomoPosition   = mul(float4(Input.f3LocalPosition, 1.0f), mul(mul(WorldMatrix, ViewMatrix), ProjectionMatrix));
     Output.f3WorldPosition  = mul(float4(Input.f3LocalPosition, 1.0f), WorldMatrix).xyz;
-    Output.f3Color          = Input.f3Color;
+    Output.f4Color          = Input.f4Color;
     
     return Output;
 }

@@ -22,6 +22,7 @@ public:
     virtual bool DrawFragment()         = 0;
     virtual bool GraphOptionsUpdated()  = 0;
     virtual bool GraphFunctionUpdated() = 0;
+    virtual bool GraphStyleUpdated()    = 0;
 
 protected:
     void SetRenderSpecificOutput(ID3D11RenderTargetView* pRTV, ID3D11DepthStencilView* pDSV);

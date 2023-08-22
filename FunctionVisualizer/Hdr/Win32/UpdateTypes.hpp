@@ -3,5 +3,6 @@
 enum UpdateTypes
 {
     GraphOptionsUpdate,
-    GraphFunctionUpdate
+    GraphFunctionUpdate,
+    GraphStyleUpdate,
 };

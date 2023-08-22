@@ -10,15 +10,7 @@
 class TwoVarFunction : public D3D11Fragment
 {
 public:
-    TwoVarFunction();
-
-
-    typedef struct Vertex
-    {
-        DirectX::XMFLOAT3 f3LocalPosition;          //LocalPosition
-        DirectX::XMFLOAT3 f3Color;                  //Color
-    }Vertex;
-    
+    TwoVarFunction();    
 
 
     void BindFragmentSpecificRenderOutput();
@@ -27,11 +19,15 @@ public:
     bool DrawFragment() override;
     bool GraphOptionsUpdated() override;
     bool GraphFunctionUpdated() override;
-
-    void    CreatePlane(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, List<TwoVarFunction::Vertex>& PlaneVertices, List<DWORD>& PlaneIndices);
-    float   EvaluateFunction(float fX, float fZ);
+    bool GraphStyleUpdated() override;
 
 private:
+    typedef struct Vertex
+    {
+        DirectX::XMFLOAT3 f3LocalPosition;          //LocalPosition
+        DirectX::XMFLOAT4 f4Color;                  //Color
+    }Vertex;
+
     typedef struct VertexTransformation
     {
         DirectX::XMMATRIX WorldMatrix;
@@ -44,6 +40,10 @@ private:
         float   fRangeY;
         char    Pad0[12];
     }RangeInfo;
+
+
+    void    CreatePlane(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, List<TwoVarFunction::Vertex>& PlaneVertices, List<DWORD>& PlaneIndices); 
+    float   EvaluateFunction(float fX, float fZ);
 
 
     List<TwoVarFunction::Vertex>    PlaneVertices;     //Defined for XZ
@@ -64,4 +64,6 @@ private:
 
     Microsoft::WRL::ComPtr<ID3D11PixelShader>   cpPixelShader;
     Microsoft::WRL::ComPtr<ID3D11Buffer>        cpPSRangeInfoConstantBuffer;
+
+    Microsoft::WRL::ComPtr<ID3D11BlendState> cpBlendState; 
 };

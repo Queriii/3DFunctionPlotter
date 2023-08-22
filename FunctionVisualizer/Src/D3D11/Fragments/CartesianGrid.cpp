@@ -553,9 +553,169 @@ bool CartesianGrid::GraphFunctionUpdated()
     return true;
 }
 
+bool CartesianGrid::GraphStyleUpdated()
+{
+    GraphOptions GraphOptionsConfig = Window::GetGraphOptionsConfig();
+
+    this->GenerateGrid(GraphOptionsConfig.uiRangeXAxis, GraphOptionsConfig.uiRangeYAxis, GraphOptionsConfig.uiRangeZAxis, CartesianGrid::XZ);
+    this->GenerateGrid(GraphOptionsConfig.uiRangeXAxis, GraphOptionsConfig.uiRangeYAxis, GraphOptionsConfig.uiRangeZAxis, CartesianGrid::XY);
+    this->GenerateGrid(GraphOptionsConfig.uiRangeXAxis, GraphOptionsConfig.uiRangeYAxis, GraphOptionsConfig.uiRangeZAxis, CartesianGrid::ZY);
+
+    this->cpXZGridVertexBuffer.Reset();
+    this->cpXZGridIndexBuffer.Reset();
+    this->cpXYGridVertexBuffer.Reset();
+    this->cpXYGridIndexBuffer.Reset();
+    this->cpZYGridVertexBuffer.Reset();
+    this->cpZYGridIndexBuffer.Reset();
+
+
+
+    //XZ
+    D3D11_BUFFER_DESC XZGridVertexBufferDesc =
+    {
+        static_cast<UINT>(this->XZGridVertices.Size() * sizeof(CartesianGrid::Vertex)),
+        D3D11_USAGE_IMMUTABLE,
+        D3D11_BIND_VERTEX_BUFFER,
+        NULL,
+        NULL,
+        NULL
+    };
+    D3D11_SUBRESOURCE_DATA XZGridVertexBufferSubRe =
+    {
+        &(this->XZGridVertices[0]),
+        NULL,
+        NULL
+    };
+    if (FAILED(D3D11::GetD3D11Device()->CreateBuffer(&XZGridVertexBufferDesc, &XZGridVertexBufferSubRe, this->cpXZGridVertexBuffer.GetAddressOf())))
+    {
+        AdditionalExceptionInformation::SetLastErrorCode(AdditionalExceptionInformation::AdditionalExceptionInformationIndices::_CreateBuffer);
+        AdditionalExceptionInformation::SetErrorLocation(__FILE__, __LINE__);
+        return false;
+    }
+
+    D3D11_BUFFER_DESC XZGridIndexBufferDesc =
+    {
+        static_cast<UINT>(this->XZGridIndices.Size() * sizeof(DWORD)),
+        D3D11_USAGE_IMMUTABLE,
+        D3D11_BIND_INDEX_BUFFER,
+        NULL,
+        NULL,
+        NULL
+    };
+    D3D11_SUBRESOURCE_DATA XZGridIndexBufferSubRe =
+    {
+        &(this->XZGridIndices[0]),
+        NULL,
+        NULL
+    };
+    if (FAILED(D3D11::GetD3D11Device()->CreateBuffer(&XZGridIndexBufferDesc, &XZGridIndexBufferSubRe, this->cpXZGridIndexBuffer.GetAddressOf())))
+    {
+        AdditionalExceptionInformation::SetLastErrorCode(AdditionalExceptionInformation::AdditionalExceptionInformationIndices::_CreateBuffer);
+        AdditionalExceptionInformation::SetErrorLocation(__FILE__, __LINE__);
+        return false;
+    }
+
+
+    //XY
+    D3D11_BUFFER_DESC XYGridVertexBufferDesc =
+    {
+        static_cast<UINT>(this->XYGridVertices.Size() * sizeof(CartesianGrid::Vertex)),
+        D3D11_USAGE_IMMUTABLE,
+        D3D11_BIND_VERTEX_BUFFER,
+        NULL,
+        NULL,
+        NULL
+    };
+    D3D11_SUBRESOURCE_DATA XYGridVertexBufferSubRe =
+    {
+        &(this->XYGridVertices[0]),
+        NULL,
+        NULL
+    };
+    if (FAILED(D3D11::GetD3D11Device()->CreateBuffer(&XYGridVertexBufferDesc, &XYGridVertexBufferSubRe, this->cpXYGridVertexBuffer.GetAddressOf())))
+    {
+        AdditionalExceptionInformation::SetLastErrorCode(AdditionalExceptionInformation::AdditionalExceptionInformationIndices::_CreateBuffer);
+        AdditionalExceptionInformation::SetErrorLocation(__FILE__, __LINE__);
+        return false;
+    }
+
+    D3D11_BUFFER_DESC XYGridIndexBufferDesc =
+    {
+        static_cast<UINT>(this->XYGridIndices.Size() * sizeof(DWORD)),
+        D3D11_USAGE_IMMUTABLE,
+        D3D11_BIND_INDEX_BUFFER,
+        NULL,
+        NULL,
+        NULL
+    };
+    D3D11_SUBRESOURCE_DATA XYGridIndexBufferSubRe =
+    {
+        &(this->XYGridIndices[0]),
+        NULL,
+        NULL
+    };
+    if (FAILED(D3D11::GetD3D11Device()->CreateBuffer(&XYGridIndexBufferDesc, &XYGridIndexBufferSubRe, this->cpXYGridIndexBuffer.GetAddressOf())))
+    {
+        AdditionalExceptionInformation::SetLastErrorCode(AdditionalExceptionInformation::AdditionalExceptionInformationIndices::_CreateBuffer);
+        AdditionalExceptionInformation::SetErrorLocation(__FILE__, __LINE__);
+        return false;
+    }
+
+
+    //ZY
+    D3D11_BUFFER_DESC ZYGridVertexBufferDesc =
+    {
+        static_cast<UINT>(this->ZYGridVertices.Size() * sizeof(CartesianGrid::Vertex)),
+        D3D11_USAGE_IMMUTABLE,
+        D3D11_BIND_VERTEX_BUFFER,
+        NULL,
+        NULL,
+        NULL
+    };
+    D3D11_SUBRESOURCE_DATA ZYGridVertexBufferSubRe =
+    {
+        &(this->ZYGridVertices[0]),
+        NULL,
+        NULL
+    };
+    if (FAILED(D3D11::GetD3D11Device()->CreateBuffer(&ZYGridVertexBufferDesc, &ZYGridVertexBufferSubRe, this->cpZYGridVertexBuffer.GetAddressOf())))
+    {
+        AdditionalExceptionInformation::SetLastErrorCode(AdditionalExceptionInformation::AdditionalExceptionInformationIndices::_CreateBuffer);
+        AdditionalExceptionInformation::SetErrorLocation(__FILE__, __LINE__);
+        return false;
+    }
+
+    D3D11_BUFFER_DESC ZYGridIndexBufferDesc =
+    {
+        static_cast<UINT>(this->ZYGridIndices.Size() * sizeof(DWORD)),
+        D3D11_USAGE_IMMUTABLE,
+        D3D11_BIND_INDEX_BUFFER,
+        NULL,
+        NULL,
+        NULL
+    };
+    D3D11_SUBRESOURCE_DATA ZYGridIndexBufferSubRe =
+    {
+        &(this->ZYGridIndices[0]),
+        NULL,
+        NULL
+    };
+    if (FAILED(D3D11::GetD3D11Device()->CreateBuffer(&ZYGridIndexBufferDesc, &ZYGridIndexBufferSubRe, this->cpZYGridIndexBuffer.GetAddressOf())))
+    {
+        AdditionalExceptionInformation::SetLastErrorCode(AdditionalExceptionInformation::AdditionalExceptionInformationIndices::_CreateBuffer);
+        AdditionalExceptionInformation::SetErrorLocation(__FILE__, __LINE__);
+        return false;
+    }
+
+    return true;
+}
+
 void CartesianGrid::GenerateGrid(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, CartesianGrid::GridType Type)
 {
     assert(uiRangeX != 0 && uiRangeY != 0 && uiRangeZ != 0);
+
+    GraphStyle GraphStyleConfig = Window::GetGraphStyleConfig();
+
 
     switch (Type)
     {
@@ -572,7 +732,7 @@ void CartesianGrid::GenerateGrid(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Ca
             for (int x = -static_cast<int>(uiRangeX); x <= static_cast<int>(uiRangeX); x++)
             {
                 CartesianGrid::Vertex Current;
-                Current.f3Color = DirectX::XMFLOAT3(0.0f, 0.3f, 1.0f);
+                Current.f3Color         = GraphStyleConfig.f3CartesianGridColor;
                 Current.f3LocalPosition = DirectX::XMFLOAT3(static_cast<float>(x), 0.0f, static_cast<float>(z));
 
                 this->XZGridVertices.Append(Current);
@@ -616,7 +776,7 @@ void CartesianGrid::GenerateGrid(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Ca
             for (int x = -static_cast<int>(uiRangeX); x <= static_cast<int>(uiRangeX); x++)
             {
                 CartesianGrid::Vertex Current;
-                Current.f3Color = DirectX::XMFLOAT3(0.0f, 0.3f, 1.0f);
+                Current.f3Color         = GraphStyleConfig.f3CartesianGridColor;
                 Current.f3LocalPosition = DirectX::XMFLOAT3(static_cast<float>(x), static_cast<float>(y), 0.0f);
 
                 this->XYGridVertices.Append(Current); 
@@ -660,7 +820,7 @@ void CartesianGrid::GenerateGrid(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Ca
             for (int z = -static_cast<int>(uiRangeZ); z <= static_cast<int>(uiRangeZ); z++)
             {
                 CartesianGrid::Vertex Current; 
-                Current.f3Color         = DirectX::XMFLOAT3(0.0f, 0.3f, 1.0f);
+                Current.f3Color         = GraphStyleConfig.f3CartesianGridColor;
                 Current.f3LocalPosition = DirectX::XMFLOAT3(0.0f, static_cast<float>(y), static_cast<float>(z));
 
                 this->ZYGridVertices.Append(Current); 

@@ -28,7 +28,7 @@ int WINAPI WIN_MAIN(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrev, _In_ PTS
         {
             throw Exception_Win32Initialization();
         }
-        if (!Window::RegisterWindow(__TEXT("Function Visualizer"), 600, 600))
+        if (!Window::RegisterWindow(__TEXT("3D-Plotter"), 600, 600))
         {
             throw Exception_Win32Initialization();
         }

@@ -4,13 +4,13 @@
 #include "UpdateTypes.hpp"
 
 #include <Windows.h>
+#include <DirectXMath.h>
 
 
 
 
 typedef struct GraphFunction
 {
-    bool bFirstInitialization;      //Used for proper memory cleanup.
     bool                    bShowFunction;
     PCTSTR                  ptszInfixFunction;
     unsigned int            uiLevelOfDetail;
@@ -22,9 +22,21 @@ typedef struct GraphOptions
     bool    bFreecamMovement;
     UINT    uiCameraSpeed;
     UINT    uiCameraSensitivity; 
+
     bool    bShowCartesianAxis;
     bool    bShowCartesianGrid;
 }GraphOptions;
+
+typedef struct GraphStyle
+{
+    DirectX::XMFLOAT3 f3CartesianAxisColor;
+    DirectX::XMFLOAT3 f3CartesianGridColor;
+    DirectX::XMFLOAT3 f3GraphedFunctionColor;
+    DirectX::XMFLOAT3 f3WorldBackgroundColor;
+
+    bool bWireframeFunction;
+    bool bTransparentFunction;
+}GraphStyle;
 
 
 
@@ -54,6 +66,8 @@ public:
     static GraphFunction*   GetGraphFunctionConfigPtr();
     static GraphOptions     GetGraphOptionsConfig();
     static GraphOptions*    GetGraphOptionsConfigPtr();
+    static GraphStyle       GetGraphStyleConfig();
+    static GraphStyle*      GetGraphStyleConfigPtr();
 
     static void Cleanup();
 
@@ -73,8 +87,10 @@ private:
 
     static GraphFunction    GraphFunctionConfig;
     static GraphOptions     GraphOptionsConfig;
+    static GraphStyle       GraphStyleConfig;
 
     static LRESULT __stdcall Win32MessageHandler(HWND hwndWindow, UINT uiMessage, WPARAM wParam, LPARAM lParam);
     static INT_PTR __stdcall GraphFunctionDlgMessageHandler(HWND hwndDlg, UINT UiMessage, WPARAM wParam, LPARAM lParam);
     static INT_PTR __stdcall GraphOptionsDlgMessageHandler(HWND hwndDlg, UINT uiMessage, WPARAM wParam, LPARAM lParam);
+    static INT_PTR __stdcall GraphStyleDlgMessageHandler(HWND hwndDlg, UINT uiMessage, WPARAM wParam, LPARAM lParam);
 };

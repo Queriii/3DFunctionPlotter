@@ -62,7 +62,7 @@ bool TwoVarFunction::InitializeFragment()
         D3D11_INPUT_ELEMENT_DESC TwoVarFunctionIL[] =
         {
             {"LocalPosition", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, NULL},
-            {"Color", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, NULL}
+            {"Color", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, NULL}
         };
         if (FAILED(D3D11::GetD3D11Device()->CreateInputLayout(TwoVarFunctionIL, _countof(TwoVarFunctionIL), cpVertexShaderBytes->GetBufferPointer(), cpVertexShaderBytes->GetBufferSize(), this->cpInputLayout.GetAddressOf())))
         {
@@ -147,9 +147,10 @@ bool TwoVarFunction::InitializeFragment()
 
 
 
-        D3D11_RASTERIZER_DESC RasterizerStateDesc =
+        GraphStyle GraphStyleConfig = Window::GetGraphStyleConfig();
+        D3D11_RASTERIZER_DESC RasterizerStateDesc = 
         {
-            D3D11_FILL_WIREFRAME, 
+            (GraphStyleConfig.bWireframeFunction) ? D3D11_FILL_WIREFRAME : D3D11_FILL_SOLID, 
             D3D11_CULL_NONE,
             FALSE,
             NULL,
@@ -205,6 +206,31 @@ bool TwoVarFunction::InitializeFragment()
             AdditionalExceptionInformation::SetErrorLocation(__FILE__, __LINE__); 
             bStatus = false; 
             break; 
+        }
+
+
+
+        D3D11_BLEND_DESC BlendStateDesc =
+        {
+            FALSE,
+            FALSE,
+            {
+                TRUE,
+                D3D11_BLEND_SRC_ALPHA, 
+                D3D11_BLEND_INV_SRC_ALPHA, 
+                D3D11_BLEND_OP_ADD,
+                D3D11_BLEND_ZERO, 
+                D3D11_BLEND_ONE, 
+                D3D11_BLEND_OP_ADD,
+                D3D11_COLOR_WRITE_ENABLE_ALL 
+            }
+        };
+        if (FAILED(D3D11::GetD3D11Device()->CreateBlendState(&BlendStateDesc, this->cpBlendState.GetAddressOf())))
+        {
+            AdditionalExceptionInformation::SetLastErrorCode(AdditionalExceptionInformation::AdditionalExceptionInformationIndices::_CreateBlendState);
+            AdditionalExceptionInformation::SetErrorLocation(__FILE__, __LINE__);
+            bStatus = false;
+            break;
         }
 
     } while (false);
@@ -275,12 +301,13 @@ bool TwoVarFunction::DrawFragment()
     D3D11::GetD3D11DeviceContext()->PSSetShader(this->cpPixelShader.Get(), nullptr, NULL);
     D3D11::GetD3D11DeviceContext()->PSSetConstantBuffers(0, 1, this->cpPSRangeInfoConstantBuffer.GetAddressOf());
 
-
+    D3D11::GetD3D11DeviceContext()->OMSetBlendState(this->cpBlendState.Get(), {}, 0xFFFFFFFF);
     this->BindFragmentSpecificRenderOutput();
 
     D3D11::GetD3D11DeviceContext()->DrawIndexed(this->PlaneIndices.Size(), 0, 0);
 
 
+    D3D11::GetD3D11DeviceContext()->OMSetBlendState(nullptr, {}, 0xFFFFFFFF);
 
     return true;
 }
@@ -428,6 +455,90 @@ bool TwoVarFunction::GraphFunctionUpdated()
     return true;
 }
 
+bool TwoVarFunction::GraphStyleUpdated()
+{
+    GraphOptions    GraphOptionsConfig  = Window::GetGraphOptionsConfig();
+    GraphStyle      GraphStyleConfig    = Window::GetGraphStyleConfig();
+
+
+
+    this->CreatePlane(GraphOptionsConfig.uiRangeXAxis, GraphOptionsConfig.uiRangeYAxis, GraphOptionsConfig.uiRangeZAxis, this->PlaneVertices, this->PlaneIndices);
+
+    this->cpVertexBuffer.Reset();
+    this->cpIndexBuffer.Reset();
+
+    D3D11_BUFFER_DESC PlaneVertexBufferDesc =
+    {
+        static_cast<UINT>(this->PlaneVertices.Size() * sizeof(TwoVarFunction::Vertex)),
+        D3D11_USAGE_IMMUTABLE,
+        D3D11_BIND_VERTEX_BUFFER,
+        NULL,
+        NULL,
+        NULL
+    };
+    D3D11_SUBRESOURCE_DATA PlaneVertexBufferSubRe =
+    {
+        &(this->PlaneVertices[0]),
+        NULL,
+        NULL
+    };
+    if (FAILED(D3D11::GetD3D11Device()->CreateBuffer(&PlaneVertexBufferDesc, &PlaneVertexBufferSubRe, this->cpVertexBuffer.GetAddressOf())))
+    {
+        AdditionalExceptionInformation::SetLastErrorCode(AdditionalExceptionInformation::AdditionalExceptionInformationIndices::_CreateBuffer);
+        AdditionalExceptionInformation::SetErrorLocation(__FILE__, __LINE__);
+        return false;
+    }
+
+    D3D11_BUFFER_DESC PlaneIndexBufferDesc =
+    {
+        static_cast<UINT>(this->PlaneIndices.Size() * sizeof(DWORD)),
+        D3D11_USAGE_IMMUTABLE,
+        D3D11_BIND_INDEX_BUFFER,
+        NULL,
+        NULL,
+        NULL
+    };
+    D3D11_SUBRESOURCE_DATA PlaneIndexBufferSubRe =
+    {
+        &(this->PlaneIndices[0]),
+        NULL,
+        NULL
+    };
+    if (FAILED(D3D11::GetD3D11Device()->CreateBuffer(&PlaneIndexBufferDesc, &PlaneIndexBufferSubRe, this->cpIndexBuffer.GetAddressOf())))
+    {
+        AdditionalExceptionInformation::SetLastErrorCode(AdditionalExceptionInformation::AdditionalExceptionInformationIndices::_CreateBuffer);
+        AdditionalExceptionInformation::SetErrorLocation(__FILE__, __LINE__);
+        return false;
+    }
+
+
+
+    this->cpRasterizerState.Reset();
+    D3D11_RASTERIZER_DESC RasterizerStateDesc =
+    {
+        (GraphStyleConfig.bWireframeFunction) ? D3D11_FILL_WIREFRAME : D3D11_FILL_SOLID,
+        D3D11_CULL_NONE,
+        FALSE,
+        NULL,
+        0.0f,
+        0.0f,
+        TRUE,
+        FALSE,
+        FALSE,
+        FALSE
+    };
+    if (FAILED(D3D11::GetD3D11Device()->CreateRasterizerState(&RasterizerStateDesc, this->cpRasterizerState.GetAddressOf())))
+    {
+        AdditionalExceptionInformation::SetLastErrorCode(AdditionalExceptionInformation::AdditionalExceptionInformationIndices::_CreateRasterizerState);
+        AdditionalExceptionInformation::SetErrorLocation(__FILE__, __LINE__);
+        return false;
+    }
+
+
+
+    return true;
+}
+
 void TwoVarFunction::CreatePlane(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, List<TwoVarFunction::Vertex>& PlaneVertices, List<DWORD>& PlaneIndices)
 {
     assert(uiRangeX != NULL && uiRangeY != NULL && uiRangeZ != NULL);
@@ -435,7 +546,8 @@ void TwoVarFunction::CreatePlane(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Li
     PlaneVertices.RemoveAll();
     PlaneIndices.RemoveAll();
 
-    GraphFunction GraphFunctionConfig = Window::GetGraphFunctionConfig();
+    GraphFunction   GraphFunctionConfig = Window::GetGraphFunctionConfig();
+    GraphStyle      GraphStyleConfig    = Window::GetGraphStyleConfig();
     
     for (int i = -static_cast<int>(uiRangeZ); i <= static_cast<int>(uiRangeZ); i++)
     {
@@ -447,7 +559,7 @@ void TwoVarFunction::CreatePlane(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Li
                 {
                     TwoVarFunction::Vertex Current; 
                     Current.f3LocalPosition = DirectX::XMFLOAT3(static_cast<float>(j), TwoVarFunction::EvaluateFunction(static_cast<float>(j), static_cast<float>(i)), static_cast<float>(i)); 
-                    Current.f3Color         = DirectX::XMFLOAT3(0.0f, 0.6f, 0.4f); 
+                    Current.f4Color         = DirectX::XMFLOAT4(GraphStyleConfig.f3GraphedFunctionColor.x, GraphStyleConfig.f3GraphedFunctionColor.y, GraphStyleConfig.f3GraphedFunctionColor.z, (GraphStyleConfig.bTransparentFunction) ? 0.5f : 1.0f);
 
                     this->PlaneVertices.Append(Current); 
                 }
@@ -457,7 +569,7 @@ void TwoVarFunction::CreatePlane(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Li
                     {
                         TwoVarFunction::Vertex Current; 
                         Current.f3LocalPosition = DirectX::XMFLOAT3(static_cast<float>(j) + static_cast<float>(subX) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail), TwoVarFunction::EvaluateFunction(static_cast<float>(j) + static_cast<float>(subX) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail), static_cast<float>(i)), static_cast<float>(i));
-                        Current.f3Color         = DirectX::XMFLOAT3(0.0f, 0.6f, 0.4f); 
+                        Current.f4Color         = DirectX::XMFLOAT4(GraphStyleConfig.f3GraphedFunctionColor.x, GraphStyleConfig.f3GraphedFunctionColor.y, GraphStyleConfig.f3GraphedFunctionColor.z, (GraphStyleConfig.bTransparentFunction) ? 0.5f : 1.0f);
 
                         this->PlaneVertices.Append(Current); 
                     }
@@ -474,7 +586,7 @@ void TwoVarFunction::CreatePlane(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Li
                     {
                         TwoVarFunction::Vertex Current; 
                         Current.f3LocalPosition = DirectX::XMFLOAT3(static_cast<float>(j), TwoVarFunction::EvaluateFunction(static_cast<float>(j), static_cast<float>(i) + static_cast<float>(subZ) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail)), static_cast<float>(i) + static_cast<float>(subZ) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail));
-                        Current.f3Color         = DirectX::XMFLOAT3(0.0f, 0.6f, 0.4f);
+                        Current.f4Color         = DirectX::XMFLOAT4(GraphStyleConfig.f3GraphedFunctionColor.x, GraphStyleConfig.f3GraphedFunctionColor.y, GraphStyleConfig.f3GraphedFunctionColor.z, (GraphStyleConfig.bTransparentFunction) ? 0.5f : 1.0f);
 
                         this->PlaneVertices.Append(Current); 
                     }
@@ -484,7 +596,7 @@ void TwoVarFunction::CreatePlane(UINT uiRangeX, UINT uiRangeY, UINT uiRangeZ, Li
                         {
                             TwoVarFunction::Vertex Current; 
                             Current.f3LocalPosition = DirectX::XMFLOAT3(static_cast<float>(j) + static_cast<float>(subX) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail), TwoVarFunction::EvaluateFunction(static_cast<float>(j) + static_cast<float>(subX) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail), static_cast<float>(i) + static_cast<float>(subZ) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail)), static_cast<float>(i) + static_cast<float>(subZ) / static_cast<float>(GraphFunctionConfig.uiLevelOfDetail)); 
-                            Current.f3Color = DirectX::XMFLOAT3(0.0f, 0.6f, 0.4f);
+                            Current.f4Color = DirectX::XMFLOAT4(GraphStyleConfig.f3GraphedFunctionColor.x, GraphStyleConfig.f3GraphedFunctionColor.y, GraphStyleConfig.f3GraphedFunctionColor.z, (GraphStyleConfig.bTransparentFunction) ? 0.5f : 1.0f);
 
                             this->PlaneVertices.Append(Current);
                         }

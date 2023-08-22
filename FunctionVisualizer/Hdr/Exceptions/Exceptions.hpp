@@ -114,6 +114,7 @@ public:
         _CreateSamplerState,
         _CreateShaderResourceView,
         _CreateRasterizerState,
+        _CreateBlendState,
     };
     static constexpr const char* AdditionalExceptionInformationTable[] = 
     {
@@ -145,6 +146,7 @@ public:
         ("Failed to create sampler state."),
         ("Failed to create a shader resource view."),
         ("Failed to create rasterizer state."),
+        ("Failed to create a blend state."),
     };
 
     static AdditionalExceptionInformation::AdditionalExceptionInformationIndices    GetLastErrorCode();

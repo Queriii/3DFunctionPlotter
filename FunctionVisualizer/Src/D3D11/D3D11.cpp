@@ -1,6 +1,7 @@
 #include "../../Hdr/D3D11/D3D11.hpp"
 #include "../../Hdr/D3D11/D3D11Camera.hpp"
 #include "../../Hdr/Win32/Timer.hpp"
+#include "../../Hdr/Win32/Window.hpp"
 #include "../../Hdr/Exceptions/Exceptions.hpp"
 
 #include <d3dcompiler.h>
@@ -245,6 +246,15 @@ bool D3D11::UpdateFragments(UpdateTypes Type)
             break;
         }
 
+        case UpdateTypes::GraphStyleUpdate:
+        {
+            if (!D3D11::Fragments[i]->GraphStyleUpdated())
+            {
+                return false;
+            }
+            break;
+        }
+
         }
 
     }
@@ -287,7 +297,8 @@ bool D3D11::RenderFrame()
     D3D11::ProcessKeyboard();       //Can't return false...
 
 
-    float BkColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    GraphStyle GraphStyleConfig = Window::GetGraphStyleConfig();
+    float BkColor[4]            = { GraphStyleConfig.f3WorldBackgroundColor.x, GraphStyleConfig.f3WorldBackgroundColor.y, GraphStyleConfig.f3WorldBackgroundColor.z, 1.0f };
     D3D11::cpDeviceContext->ClearRenderTargetView(D3D11::cpSCBackBufferRTV.Get(), BkColor);
     D3D11::cpDeviceContext->ClearDepthStencilView(D3D11::cpSCDepthStencilBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, NULL);
 
