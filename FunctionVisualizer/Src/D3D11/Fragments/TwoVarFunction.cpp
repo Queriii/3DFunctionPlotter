@@ -49,8 +49,6 @@ bool TwoVarFunction::InitializeFragment()
     do
     {
         if (FAILED(D3DReadFileToBlob(pctszVertexShader, cpVertexShaderBytes.GetAddressOf())) ||
-            FAILED(D3DReadFileToBlob(pctszHullShader, cpHullShaderBytes.GetAddressOf())) ||
-            FAILED(D3DReadFileToBlob(pctszDomainShader, cpDomainShaderBytes.GetAddressOf())) ||
             FAILED(D3DReadFileToBlob(pctszPixelShader, cpPixelShaderBytes.GetAddressOf())))
         {
             AdditionalExceptionInformation::SetLastErrorCode(AdditionalExceptionInformation::_D3DReadFileToBlob);

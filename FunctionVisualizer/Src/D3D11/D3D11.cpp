@@ -315,6 +315,7 @@ bool D3D11::RenderFrame()
         }
     }
 
+
     D3D11::cpSwapChain->Present(1, 0);
 
     return true;
