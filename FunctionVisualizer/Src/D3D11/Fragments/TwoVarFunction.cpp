@@ -39,8 +39,6 @@ bool TwoVarFunction::InitializeFragment()
 {
     Microsoft::WRL::ComPtr<ID3DBlob> cpVertexShaderBytes, cpHullShaderBytes, cpDomainShaderBytes, cpPixelShaderBytes;
     PCTSTR pctszVertexShader    = this->GetValidShaderPath(__TEXT("TwoVarFunctionVS.cso"));
-    PCTSTR pctszHullShader      = this->GetValidShaderPath(__TEXT("TwoVarFunctionHS.cso"));
-    PCTSTR pctszDomainShader    = this->GetValidShaderPath(__TEXT("TwoVarFunctionDS.cso"));
     PCTSTR pctszPixelShader     = this->GetValidShaderPath(__TEXT("TwoVarFunctionPS.cso"));
     
 
@@ -236,14 +234,6 @@ bool TwoVarFunction::InitializeFragment()
     if (pctszVertexShader)
     {
         delete[] pctszVertexShader; 
-    }
-    if (pctszHullShader)
-    {
-        delete[] pctszHullShader;
-    }
-    if (pctszDomainShader)
-    {
-        delete[] pctszDomainShader; 
     }
     if (pctszPixelShader)
     {
